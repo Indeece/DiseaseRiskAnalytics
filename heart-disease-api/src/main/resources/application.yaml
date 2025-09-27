@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: heart-disease-api
+
+server:
+  port: 8084
+
+model:
+  url: ${MODEL_URL}
+  apikey: ${API_KEY}
+
+# add monitoring and database configurations
