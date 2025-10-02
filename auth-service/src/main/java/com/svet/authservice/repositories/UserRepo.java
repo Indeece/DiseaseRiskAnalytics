@@ -1,13 +1,15 @@
 package com.svet.authservice.repositories;
 
 import com.svet.authservice.entities.Role;
+import com.svet.authservice.entities.User;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface UserRepo {
-    Optional<Role> findByUsername(String username);
-    Optional<Role> findByEmail(String email);
-    Optional<Role> findById(Long id);
+public interface UserRepo extends JpaRepository<User,Long> {
+    Optional<User> findByUsername(String username);
+    Optional<User> findByEmail(String email);
+    Optional<User> findById(Long id);
 }
