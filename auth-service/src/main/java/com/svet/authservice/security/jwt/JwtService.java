@@ -4,7 +4,6 @@ import com.svet.authservice.dto.JwtDto;
 import com.svet.authservice.services.MyUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,13 +16,13 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    @Value("app.jwtSecret")
+    @Value("${app.jwtSecret}")
     private String jwtSecret;
 
-    @Value("app.jwtExpirationMs")
+    @Value("${app.jwtExpirationMs}")
     private int jwtExpirationMs;
 
-    @Value("app.jwtRefreshExpirationMs")
+    @Value("${app.jwtRefreshExpirationMs}")
     private int jwtRefreshExpirationMs;
 
     public JwtDto generateJwtToken(String username) {

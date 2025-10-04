@@ -1,5 +1,7 @@
 package com.svet.authservice.services;
 
+import com.svet.authservice.entities.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
