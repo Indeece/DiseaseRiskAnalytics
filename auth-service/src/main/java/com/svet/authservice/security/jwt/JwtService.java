@@ -2,10 +2,11 @@ package com.svet.authservice.security.jwt;
 
 import com.svet.authservice.dto.JwtDto;
 import com.svet.authservice.services.MyUserDetails;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -25,13 +26,14 @@ public class JwtService {
     @Value("${app.jwtRefreshExpirationMs}")
     private int jwtRefreshExpirationMs;
 
-    public JwtDto generateJwtToken(String username) {
-        Map<String, Object> claims = new HashMap<>();
+    private static final Logger LOGGER = LogManager.getLogger(JwtService.class);
+
+    public JwtDto generateTokens(Map<String, Object> claims, String username) {
         JwtDto jwtDto = new JwtDto();
         jwtDto.setToken(generateJwtToken(claims, username));
-        jwtDto.setRefreshToken(generateRefreshToken(generateRefreshToken(username)));
+        jwtDto.setRefreshToken(generateRefreshToken(username));
         return jwtDto;
-    }
+    };
 
     private String generateJwtToken(Map<String, Object> claims, String username) {
         return Jwts.builder()
@@ -83,8 +85,25 @@ public class JwtService {
         return extractExpiration(token).before(new Date());
     }
 
-    public Boolean validateToken(String token, MyUserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    public Boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(getSecretKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            return true;
+        } catch (ExpiredJwtException e) {
+            LOGGER.error("Expired JWT token", e);
+        } catch (UnsupportedJwtException e) {
+            LOGGER.error("Unsupported JWT token", e);
+        } catch (MalformedJwtException e) {
+            LOGGER.error("Malformed JWT token", e);
+        } catch (SecurityException e) {
+            LOGGER.error("Security exception", e);
+        } catch (Exception e) {
+            LOGGER.error("Invalid token exception", e);
+        }
+        return false;
     }
 }

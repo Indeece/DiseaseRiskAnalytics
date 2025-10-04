@@ -19,7 +19,6 @@ import javax.naming.AuthenticationException;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final MyUserDetails userInfoService;
     private final UserServiceImpl userService;
 
     @PostMapping("/signIn")
@@ -35,7 +34,13 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto) throws Exception {
+        System.out.println("createUser");
         userService.createUser(userDto);
         return null;
+    }
+
+    @PostMapping("/protected")
+    public String protectedRoute() {
+        return "protected";
     }
 }
