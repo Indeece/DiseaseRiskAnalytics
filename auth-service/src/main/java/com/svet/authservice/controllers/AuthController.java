@@ -1,6 +1,7 @@
 package com.svet.authservice.controllers;
 
 import com.svet.authservice.dto.JwtDto;
+import com.svet.authservice.dto.RefreshTokenDto;
 import com.svet.authservice.dto.UserCredentials;
 import com.svet.authservice.dto.UserDto;
 import com.svet.authservice.services.MyUserDetails;
@@ -37,6 +38,12 @@ public class AuthController {
         System.out.println("createUser");
         userService.createUser(userDto);
         return null;
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<JwtDto> refreshToken(@RequestBody RefreshTokenDto refreshTokenDto) throws Exception {
+        JwtDto jwt =  userService.refreshToken(refreshTokenDto);
+        return ResponseEntity.ok(jwt);
     }
 
     @PostMapping("/protected")
