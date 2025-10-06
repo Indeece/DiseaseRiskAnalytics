@@ -1,7 +1,6 @@
 package com.svet.authservice.security.jwt;
 
 import com.svet.authservice.dto.JwtDto;
-import com.svet.authservice.services.MyUserDetails;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

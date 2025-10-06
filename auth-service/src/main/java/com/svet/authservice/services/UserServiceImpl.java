@@ -6,6 +6,7 @@ import com.svet.authservice.dto.UserCredentials;
 import com.svet.authservice.dto.UserDto;
 import com.svet.authservice.entities.User;
 import com.svet.authservice.enums.ERole;
+import com.svet.authservice.handlers.ErrorHandler;
 import com.svet.authservice.repositories.RoleRepo;
 import com.svet.authservice.repositories.UserRepo;
 import com.svet.authservice.security.jwt.JwtService;
@@ -50,14 +51,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public String createUser(UserDto userDto) throws Exception {
+    public UserDto createUser(UserDto userDto) throws Exception {
+
+        if (userRepo.existsByEmail(userDto.getEmail())) {
+            throw new ErrorHandler.UserAlreadyExistsException("User with email " + userDto.getEmail() + " already exists");
+        }
+
+        if (userRepo.existsByUsername(userDto.getUsername())) {
+            throw new ErrorHandler.UserAlreadyExistsException("User with username " + userDto.getUsername() + " already exists");
+        }
         User user = new User();
         user.setEmail(userDto.getEmail());
         user.setPassword(encoder.encode(userDto.getPassword()));
         user.setUsername(userDto.getUsername());
-        user.setRoles(List.of(roleRepo.findByName(ERole.ROLE_USER).get()));
-        userRepo.save(user);
-        return "User created";
+        user.setRoles(List.of(roleRepo.findByName(ERole.ROLE_USER)
+                .orElseThrow(() -> new RuntimeException("Error: Role is not found."))));
+
+        try {
+            User savedUser = userRepo.save(user);
+            return convertUserToUserDto(savedUser);
+        } catch (Exception e) {
+            throw new ErrorHandler.UserCreationException("Failed to create user: " + e.getMessage());
+        }
     }
 
     @Override
@@ -90,7 +105,7 @@ public class UserServiceImpl implements UserService {
     private Map<String, Object> setUserClaims(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("id", user.getId());
-        claims.put("roles", user.getRoles());
+//        claims.put("roles", user.getRoles());
         return claims;
     }
 
@@ -100,7 +115,7 @@ public class UserServiceImpl implements UserService {
         userDto.setEmail(user.getEmail());
         userDto.setUsername(user.getUsername());
         userDto.setPassword(user.getPassword());
-        userDto.setRoles(user.getRoles());
+//        userDto.setRoles(user.getRoles());
         return userDto;
     }
 }

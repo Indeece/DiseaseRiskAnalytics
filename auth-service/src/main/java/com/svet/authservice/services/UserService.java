@@ -12,7 +12,7 @@ import javax.naming.AuthenticationException;
 public interface UserService {
     JwtDto signIn(UserCredentials userCredentials) throws AuthenticationException;
     JwtDto refreshToken(RefreshTokenDto refreshTokenDto) throws Exception;
-    String createUser(UserDto userDto) throws Exception;
+    UserDto createUser(UserDto userDto) throws Exception;
     UserDto getUserById(Long id) throws ChangeSetPersister.NotFoundException;
     UserDto getUserByUsername(String username) throws ChangeSetPersister.NotFoundException;
 }
