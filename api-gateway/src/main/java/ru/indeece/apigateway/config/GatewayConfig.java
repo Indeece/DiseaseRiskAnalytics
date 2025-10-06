@@ -14,7 +14,7 @@ public class GatewayConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
 
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
-            "/auth/registration",
+            "/auth/register",
             "/auth/signIn",
             "/auth/refresh"
     );
