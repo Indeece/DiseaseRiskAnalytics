@@ -13,10 +13,10 @@ WORKDIR /app/
 RUN pip install -r requirements.txt
 
 # Train and save ML model to the working dir
-RUN python modelCoranaryDisease.py
+RUN python PipeLineLogisticRegression.py
 
 # Expose the port uvicorn is running on
 EXPOSE 80
 
 # Run uvicorn server
-CMD ["uvicorn", "server:app", "--reload", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "server:app", "--reload", "--host", "127.0.0.1", "--port", "80"]

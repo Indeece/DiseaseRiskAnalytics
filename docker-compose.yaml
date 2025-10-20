@@ -1,0 +1,9 @@
+
+services:
+  regressor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: regressor
+    ports:
+      - "80:80"

@@ -2,7 +2,7 @@ import joblib
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
-
+from model import SGDLogisticRegression
 # App creation and model loading
 app = FastAPI()
 LogicRegressor = joblib.load("./LogicRegressor.joblib")
@@ -52,12 +52,7 @@ def predict(Regressor: RegressorSpecies):
         Regressor.heartRate,
         Regressor.glucose
     ]]
-    prediction = Regressor.predict(features).tolist()[0]
+    prediction = LogicRegressor.predict(features, threshold=0.45).tolist()[0]
     return {
         "prediction": prediction
     }
-
-
-if __name__ == '__main__':
-    # Run server using given host and port
-    uvicorn.run(app, host='127.0.0.1', port=80)
