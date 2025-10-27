@@ -14,7 +14,6 @@ class RegressorSpecies(BaseModel):
     """
     male: int
     age: int
-    education: float
     currentSmoker: int
     cigsPerDay: float
     BPMeds: float
@@ -38,7 +37,6 @@ def predict(Regressor: RegressorSpecies):
     features = [[
         Regressor.male,
         Regressor.age,
-        Regressor.education,
         Regressor.currentSmoker,
         Regressor.cigsPerDay,
         Regressor.BPMeds,
@@ -52,7 +50,7 @@ def predict(Regressor: RegressorSpecies):
         Regressor.heartRate,
         Regressor.glucose
     ]]
-    prediction = LogicRegressor.predict(features, threshold=0.45).tolist()[0]
+    prediction = LogicRegressor.predict(features, threshold=0.79)[0]
     return {
         "prediction": prediction
     }

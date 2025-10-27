@@ -1,11 +1,12 @@
 from sklearn.base import RegressorMixin # we'll inherit this in our class for calling class's structure
 import numpy as np
+import random
 from sklearn.preprocessing import StandardScaler
 import pandas as pd
 
 
 class SGDLogisticRegression(RegressorMixin):
-    def __init__(self, lr=0.01, delta_converged=1e-3, max_steps=10000, batch_size=64):
+    def __init__(self, lr=0.002, delta_converged=1e-3, max_steps=100000, batch_size=64):
         self.lr = lr  # learning rate. The importance of moving the weight vector towards anti-gradient in SGD.
         self.delta_converged = delta_converged  # when the learning will stop.
         self.max_steps = max_steps  # how many steps SGD can make.
@@ -19,7 +20,7 @@ class SGDLogisticRegression(RegressorMixin):
     def fit(self, X, Y):
 
         L, F = X.shape  # L - the length of samples, F - number of features.
-        self.W = np.zeros(F)  # the weight column vector.
+        self.W = np.array([np.float64(random.randint(0, 10)) for _ in range(F)])  # the weight column vector.
 
         current_step = 0  # the SGD step.
         continue_flag = True  # the condition that we haven't reached max steps.
@@ -50,10 +51,10 @@ class SGDLogisticRegression(RegressorMixin):
                     # calculate the sigmoid function for every row of data
                     probability = [1 / (1 + np.e ** np.dot(self.W, X_batch[x])) for x in range(len(X_batch))]
                     # calculate the gradient
-                    grad = sum([np.dot(sum(X_batch[x]), (Y_batch - probability)[x]) for x in range(len(X_batch))])
+                    grad = np.dot(X_batch.T, (Y_batch - probability))
                     # move the weight vector towards anti-gradient
-                    self.W -= (self.lr * grad)
-
+                    self.W -= self.lr*grad
+                    # print(self.W)
                     # if current_step%100 == 0:
                     # print(f"Training is finished on {current_step/100}%")
                     # print(self.W)
@@ -72,3 +73,4 @@ class SGDLogisticRegression(RegressorMixin):
         x_scaled = self.scaler.transform(X)
         probabilities = [1 / (1 + np.e ** np.dot(self.W, x_scaled[x])) for x in range(len(x_scaled))]
         return [1 if i > threshold else 0 for i in probabilities]
+
