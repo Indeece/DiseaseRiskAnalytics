@@ -50,7 +50,7 @@ def predict(Regressor: RegressorSpecies):
         Regressor.heartRate,
         Regressor.glucose
     ]]
-    prediction = LogicRegressor.predict(features, threshold=0.79)[0]
+    prediction = LogicRegressor.predict(features)
     return {
         "prediction": prediction
     }

@@ -2,11 +2,12 @@ from sklearn.base import RegressorMixin # we'll inherit this in our class for ca
 import numpy as np
 import random
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score
 import pandas as pd
 
-
+history_loss = []
 class SGDLogisticRegression(RegressorMixin):
-    def __init__(self, lr=0.002, delta_converged=1e-3, max_steps=100000, batch_size=64):
+    def __init__(self, lr=0.002, delta_converged=1e-3, max_steps=10000, batch_size=64):
         self.lr = lr  # learning rate. The importance of moving the weight vector towards anti-gradient in SGD.
         self.delta_converged = delta_converged  # when the learning will stop.
         self.max_steps = max_steps  # how many steps SGD can make.
@@ -60,17 +61,18 @@ class SGDLogisticRegression(RegressorMixin):
                     # print(self.W)
 
                     current_step += 1
-
+                    history_loss.append(accuracy_score(Y_batch, [1 if i > 0.73 else 0 for i in probability]))
                     if np.linalg.norm(self.W - last_weight_vector) < self.delta_converged:
                         continue_flag = False
                         break
                 else:
                     continue_flag = False
                     break
+
         return self.W
 
     def predict(self, X, threshold=0.5):
         x_scaled = self.scaler.transform(X)
-        probabilities = [1 / (1 + np.e ** np.dot(self.W, x_scaled[x])) for x in range(len(x_scaled))]
-        return [1 if i > threshold else 0 for i in probabilities]
+        probability = 1 / (1 + np.e ** np.dot(self.W, x_scaled.T))
+        return round(float(probability)*100, 2)
 

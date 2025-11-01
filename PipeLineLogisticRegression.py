@@ -83,9 +83,10 @@ data_train, data_test, Y_train, Y_test = train_test_split(data.drop("TenYearCHD"
 LogicRegressor = SGDLogisticRegression()  # our logistic Regression
 LogicRegressor.fit(data_train, Y_train)
 
-# joblib.dump(LogicRegressor, "./LogicRegressor.joblib")
-
-print(LogicRegressor.predict(data_test))
+joblib.dump(LogicRegressor, "./LogicRegressor.joblib")
+# print(data_test.head(1))
+# print(LogicRegressor.predict(pd.DataFrame(data_test.iloc[3188].reshape(1, 14))))
+# print(LogicRegressor.predict(data_test.head(1)))
 '''
 The model with broken gradient:
 [1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -162,15 +163,15 @@ The model with the correct gradient:
 
 # print(Counter(Y_test)) # the classes are imbalanced
 # thresholds = [x/100 for x in range(1, 90)]
-thresholds = np.arange(0.01, 0.9, step=0.01)
-best_threshold_Acc = 0
-best_result_Acc = 0
-best_threshold_B_Acc = 0
-best_result_B_Acc = 0
-result_Acc = accuracy_score(Y_test, LogicRegressor.predict(data_test, threshold=0.5))  # see the metrics
-result_B_Acc = balanced_accuracy_score(Y_test, LogicRegressor.predict(data_test, threshold=0.5))  # see the metrics
-print(result_Acc)
-print(result_B_Acc)
+# thresholds = np.arange(0.01, 0.9, step=0.01)
+# best_threshold_Acc = 0
+# best_result_Acc = 0
+# best_threshold_B_Acc = 0
+# best_result_B_Acc = 0
+# result_Acc = accuracy_score(Y_test, LogicRegressor.predict(data_test, threshold=0.5))  # see the metrics
+# result_B_Acc = balanced_accuracy_score(Y_test, LogicRegressor.predict(data_test, threshold=0.5))  # see the metrics
+# print(result_Acc)
+# print(result_B_Acc)
 
 '''
 The model with broken gradient:
@@ -184,19 +185,19 @@ The model with correct gradient:
 0.6550600612389104
 '''
 
-for x in thresholds:
-    result_Acc = accuracy_score(Y_test, LogicRegressor.predict(data_test, threshold=x))  # see the metrics
-    if result_Acc > best_result_Acc:
-        best_result_Acc = result_Acc
-        best_threshold_Acc = x
-
-for x in thresholds:
-    result_B_Acc = balanced_accuracy_score(Y_test, LogicRegressor.predict(data_test, threshold=x))  # see the metrics
-    if result_B_Acc > best_result_B_Acc:
-        best_result_B_Acc = result_B_Acc
-        best_threshold_B_Acc = x
-
-print(f"The best accuracy is {best_result_Acc} using threshold {best_threshold_Acc}") # acuracy_score = 0.648c
+# for x in thresholds:
+#     result_Acc = accuracy_score(Y_test, LogicRegressor.predict(data_test, threshold=x))  # see the metrics
+#     if result_Acc > best_result_Acc:
+#         best_result_Acc = result_Acc
+#         best_threshold_Acc = x
+#
+# for x in thresholds:
+#     result_B_Acc = balanced_accuracy_score(Y_test, LogicRegressor.predict(data_test, threshold=x))  # see the metrics
+#     if result_B_Acc > best_result_B_Acc:
+#         best_result_B_Acc = result_B_Acc
+#         best_threshold_B_Acc = x
+#
+# print(f"The best accuracy is {best_result_Acc} using threshold {best_threshold_Acc}") # acuracy_score = 0.648c
 
 # for the model with broken gradient:
 
@@ -207,8 +208,8 @@ print(f"The best accuracy is {best_result_Acc} using threshold {best_threshold_A
 # for the correct model:
 
 # The best accuracy is 0.8592767295597484 using threshold 0.79
-
-print(f"The best balanced accuracy is {best_result_B_Acc} using threshold {best_threshold_B_Acc}")
+#
+# print(f"The best balanced accuracy is {best_result_B_Acc} using threshold {best_threshold_B_Acc}")
 
 # for the model with broken gradient:
 
@@ -226,10 +227,10 @@ print(f"The best balanced accuracy is {best_result_B_Acc} using threshold {best_
 
 # for the correct gradient model:
 
-result_Acc = accuracy_score(Y_test, LogicRegressor.predict(data_test, threshold=0.79))
-print("accuracy_score:", result_Acc)
-result_B_Acc = balanced_accuracy_score(Y_test, LogicRegressor.predict(data_test, threshold=0.51))
-print("balanced_accuracy_score:", result_B_Acc)
+# result_Acc = accuracy_score(Y_test, LogicRegressor.predict(data_test, threshold=0.79))
+# print("accuracy_score:", result_Acc)
+# result_B_Acc = balanced_accuracy_score(Y_test, LogicRegressor.predict(data_test, threshold=0.51))
+# print("balanced_accuracy_score:", result_B_Acc)
 
 # straight correlations:
 # y1 = pd.Series(data["TenYearCHD"])
