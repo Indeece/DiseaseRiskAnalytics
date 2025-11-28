@@ -5,10 +5,10 @@ from pydantic import BaseModel
 from model import SGDLogisticRegression
 # App creation and model loading
 app = FastAPI()
-LogicRegressor = joblib.load("./LogicRegressor.joblib")
+LGRegCHD = joblib.load("./LGRegCHD.joblib")
 
 
-class RegressorSpecies(BaseModel):
+class LGRegCHDSpecies(BaseModel):
     """
     Input features validation for the ML model
     """
@@ -29,28 +29,28 @@ class RegressorSpecies(BaseModel):
 
 
 @app.post('/predict')
-def predict(Regressor: RegressorSpecies):
+def predict(RegressorCHD: LGRegCHDSpecies):
     """
-    :param Regressor: input data from the post request
+    :param RegressorCHD: input data from the post request
     :return: predicted iris type
     """
     features = [[
-        Regressor.male,
-        Regressor.age,
-        Regressor.currentSmoker,
-        Regressor.cigsPerDay,
-        Regressor.BPMeds,
-        Regressor.prevalentStroke,
-        Regressor.prevalentHyp,
-        Regressor.diabetes,
-        Regressor.totChol,
-        Regressor.sysBP,
-        Regressor.diaBP,
-        Regressor.BMI,
-        Regressor.heartRate,
-        Regressor.glucose
+        RegressorCHD.male,
+        RegressorCHD.age,
+        RegressorCHD.currentSmoker,
+        RegressorCHD.cigsPerDay,
+        RegressorCHD.BPMeds,
+        RegressorCHD.prevalentStroke,
+        RegressorCHD.prevalentHyp,
+        RegressorCHD.diabetes,
+        RegressorCHD.totChol,
+        RegressorCHD.sysBP,
+        RegressorCHD.diaBP,
+        RegressorCHD.BMI,
+        RegressorCHD.heartRate,
+        RegressorCHD.glucose
     ]]
-    prediction = LogicRegressor.predict(features)
+    prediction = LGRegCHD.predict(features)
     return {
         "prediction": prediction
     }

@@ -1,11 +1,10 @@
 from sklearn.base import RegressorMixin # we'll inherit this in our class for calling class's structure
 import numpy as np
-import random
+import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
 import pandas as pd
 
-history_loss = []
 class SGDLogisticRegression(RegressorMixin):
     def __init__(self, lr=0.002, delta_converged=1e-3, max_steps=10000, batch_size=64):
         self.lr = lr  # learning rate. The importance of moving the weight vector towards anti-gradient in SGD.
@@ -21,16 +20,21 @@ class SGDLogisticRegression(RegressorMixin):
     def fit(self, X, Y):
 
         L, F = X.shape  # L - the length of samples, F - number of features.
-        self.W = np.array([np.float64(random.randint(0, 10)) for _ in range(F)])  # the weight column vector.
+        self.W = np.array([float(np.random.randint(0, 10)) for _ in range(F)])  # the weight column vector.
 
         current_step = 0  # the SGD step.
         continue_flag = True  # the condition that we haven't reached max steps.
+
+        # uncomment it if you want to pyplot how the model was learning
+        # history_loss = []
+        # current_epoch = 1
 
         X_shuffled = X.copy()
         Y_shuffled = Y.copy()
         # print(type(X_shuffled))
         X_shuffled = self.scaler.fit_transform(X_shuffled)  # teach the scaler on our data and transform our data.
         # print(type(X_shuffled))
+
         while (current_step < self.max_steps and continue_flag):
             # Shuffle the samples
             indices = np.arange(0, L)  # for example  [   0    1    2 ... 4235 4236 4237]
@@ -50,9 +54,12 @@ class SGDLogisticRegression(RegressorMixin):
                     Y_batch = Y_shuffled[i: i + self.batch_size]
 
                     # calculate the sigmoid function for every row of data
-                    probability = [1 / (1 + np.e ** np.dot(self.W, X_batch[x])) for x in range(len(X_batch))]
+                    probability = [1 / (1 + np.e ** -np.dot(self.W, X_batch[x])) for x in range(len(X_batch))]
+                    # np.e ** np.dot(self.W, X_batch[x])) for x in range(len(X_batch)) - can be positive
+
                     # calculate the gradient
-                    grad = np.dot(X_batch.T, (Y_batch - probability))
+                    grad = np.dot(X_batch.T, (probability - Y_batch))
+                    # if positive, then here it should be backwards: Y_batch - probability
                     # move the weight vector towards anti-gradient
                     self.W -= self.lr*grad
                     # print(self.W)
@@ -61,7 +68,6 @@ class SGDLogisticRegression(RegressorMixin):
                     # print(self.W)
 
                     current_step += 1
-                    history_loss.append(accuracy_score(Y_batch, [1 if i > 0.73 else 0 for i in probability]))
                     if np.linalg.norm(self.W - last_weight_vector) < self.delta_converged:
                         continue_flag = False
                         break
@@ -69,10 +75,33 @@ class SGDLogisticRegression(RegressorMixin):
                     continue_flag = False
                     break
 
+            # uncomment it if you want to pyplot how the model was learning
+            # acc_score = accuracy_score(Y_shuffled, [1 if i > 0.48 else 0 for i in
+            #                                         [1 / (1 + np.e ** -np.dot(self.W, X_shuffled[x])) for x in
+            #                                          range(len(X_shuffled))]])
+            # history_loss.append(acc_score)
+            # print("The current epoch ", current_epoch)
+            # current_epoch += 1
+        # uncomment it if you want to pyplot how the model was learning
+        # plt.plot(np.arange(1, len(history_loss) + 1), history_loss, color='darkorange')
+        # plt.title("The Model's Process of Learning over time")
+        # plt.ylabel("Accuracy")
+        # plt.xlabel("Amount of epochs")
+        # plt.show()
+        # history_loss.clear()
+
         return self.W
 
     def predict(self, X, threshold=0.5):
         x_scaled = self.scaler.transform(X)
-        probability = 1 / (1 + np.e ** np.dot(self.W, x_scaled.T))
+
+        # for just one sample it gives straightly one number - probability
+
+        probability = 1 / (1 + np.e ** -np.dot(self.W, x_scaled.T))  # np.e **  - can be positive
         return round(float(probability)*100, 2)
+
+        # for many samples it gives you a list of 1 and zeros
+        #
+        # probability = [1 / (1 + np.e ** -np.dot(self.W, x_scaled[x])) for x in range(len(x_scaled))]
+        # return [1 if probability[x] >= threshold else 0 for x in range(len(probability))]
 
