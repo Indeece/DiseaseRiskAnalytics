@@ -22,7 +22,7 @@ pd.set_option('future.no_silent_downcasting', True)
 # CORONARY HEART DISEASE PIPELINE
 #
 
-# raw_data_CHD = pd.read_csv("framingham.csv")
+raw_data_CHD = pd.read_csv("framingham.csv")
 
 '''
 Demographic:
@@ -58,34 +58,34 @@ Predict variable (desired target)
 # #
 # print(Counter(raw_data_CHD["education"].isna())) # Counter({False: 4133, True: 105})
 #
-# for x in raw_data_CHD.columns:
-#     raw_data_CHD[x] = raw_data_CHD[x].fillna(raw_data_CHD[x].median())
+for x in raw_data_CHD.columns:
+    raw_data_CHD[x] = raw_data_CHD[x].fillna(raw_data_CHD[x].median())
 
 # print(raw_data_CHD)
 # print(Counter(raw_data["TenYearCHD"])) # classes are imbalanced
 # print(Counter(raw_data["glucose"].isna())) # Counter({False: 4238})
 # print(Counter(raw_data_CHD["education"].isna())) # Counter({False: 4238})
 # print(len(raw_data))
-# raw_data = raw_data.drop_duplicates() # there aren't any duplicates.
+raw_data = raw_data_CHD.drop_duplicates() # there aren't any duplicates.
 # print(len(raw_data))
 # plt.scatter(range(0, len(raw_data)), raw_data["BPMeds"])
 # plt.scatter(range(0, len(raw_data)), raw_data["age"])
 # plt.hist(raw_data["education"])
 # plt.show()
-# raw_data_CHD = raw_data_CHD.drop("education", axis=1)
-# data_CHD = raw_data_CHD.copy()
+raw_data_CHD = raw_data_CHD.drop("education", axis=1)
+data_CHD = raw_data_CHD.copy()
 
 # print(data)
 test_size = 0.3
 
-# data_train_CHD, data_test_CHD, Y_train_CHD, Y_test_CHD = train_test_split(data_CHD.drop("TenYearCHD", axis=1),
-#                                                                           np.array(data_CHD["TenYearCHD"]),
-#                                                                           test_size=test_size,
-#                                                                           random_state=random_state)
-# LGRegCHD = SGDLogisticRegression()  # our logistic Regression
-# LGRegCHD.fit(data_train_CHD, Y_train_CHD)
-# #
-# # joblib.dump(LGRegCHD, "./LGRegCHD.joblib")
+data_train_CHD, data_test_CHD, Y_train_CHD, Y_test_CHD = train_test_split(data_CHD.drop("TenYearCHD", axis=1),
+                                                                          np.array(data_CHD["TenYearCHD"]),
+                                                                          test_size=test_size,
+                                                                          random_state=random_state)
+LGRegCHD = SGDLogisticRegression()  # our logistic Regression
+LGRegCHD.fit(data_train_CHD, Y_train_CHD)
+
+joblib.dump(LGRegCHD, "./LGRegCHD.joblib")
 # # print(data_test_CHD.head(1))
 # ## print(data_test.iloc[0])
 # # print(LGRegCHD.predict(np.array(data_test.iloc[0]).reshape(1, 14)))
@@ -166,11 +166,11 @@ test_size = 0.3
 
 # print(Counter(Y_test)) # the classes are imbalanced
 # # thresholds = [x/100 for x in range(1, 90)]
-thresholds = np.arange(0.01, 0.9, step=0.01)
-best_threshold_Acc = 0
-best_result_Acc = 0
-best_threshold_B_Acc = 0
-best_result_B_Acc = 0
+# thresholds = np.arange(0.01, 0.9, step=0.01)
+# best_threshold_Acc = 0
+# best_result_Acc = 0
+# best_threshold_B_Acc = 0
+# best_result_B_Acc = 0
 # # result_Acc = accuracy_score(Y_test_CHD, LGRegCHD.predict(data_test_CHD, threshold=0.5))  # see the metrics
 # # result_B_Acc = balanced_accuracy_score(Y_test_CHD, LGRegCHD.predict(data_test_CHD, threshold=0.5))  # see the metrics
 # # print(result_Acc)
@@ -358,146 +358,146 @@ The model with correct gradient:
 
 
 
+# #
+# # OSTEOPOROSIS PIPELINE
+# #
 #
-# OSTEOPOROSIS PIPELINE
+# raw_data_OS = pd.read_csv("osteoporosis.csv")
+# print("---------------------------------------------------------")
+# print("before any cleaning:")
+# print(raw_data_OS)
+# raw_data_OS = raw_data_OS.drop(columns="Id")
 #
-
-raw_data_OS = pd.read_csv("osteoporosis.csv")
-print("---------------------------------------------------------")
-print("before any cleaning:")
-print(raw_data_OS)
-raw_data_OS = raw_data_OS.drop(columns="Id")
-
-raw_data_OS = raw_data_OS.drop(columns=["Race/Ethnicity"])
-
-for x in raw_data_OS.columns:
-    print("In %s there are " % x, Counter(raw_data_OS[x]))
-# see the age distribution
-# plt.scatter(np.arange(1, len(raw_data_OS["Age"]) + 1), raw_data_OS["Age"])
-# plt.show()
-
-# now we have to make all the categorical features numerical
-
-# male - 0
-raw_data_OS["Gender"] = raw_data_OS["Gender"].replace("Male", 0)
-# female - 1
-raw_data_OS["Gender"] = raw_data_OS["Gender"].replace("Female", 1)
-
-# normal - 0
-raw_data_OS["Hormonal Changes"] = raw_data_OS["Hormonal Changes"].replace("Normal", 0)
-# Postmenopausal - 1
-raw_data_OS["Hormonal Changes"] = raw_data_OS["Hormonal Changes"].replace("Postmenopausal", 1)
-
-# No - 0
-raw_data_OS["Family History"] = raw_data_OS["Family History"].replace("No", 0)
-# Yes - 1
-raw_data_OS["Family History"] = raw_data_OS["Family History"].replace("Yes", 1)
-
-# No - 0
-raw_data_OS["Family History"] = raw_data_OS["Family History"].replace("No", 0)
-# Yes - 1
-raw_data_OS["Family History"] = raw_data_OS["Family History"].replace("Yes", 1)
-
-# Normal - 0
-raw_data_OS["Body Weight"] = raw_data_OS["Body Weight"].replace("Normal", 0)
-# Underweight - 1
-raw_data_OS["Body Weight"] = raw_data_OS["Body Weight"].replace("Underweight", 1)
-
-# Adequate - 0
-raw_data_OS["Calcium Intake"] = raw_data_OS["Calcium Intake"].replace("Adequate", 0)
-# Low - 1
-raw_data_OS["Calcium Intake"] = raw_data_OS["Calcium Intake"].replace("Low", 1)
-
-# Sufficient - 0
-raw_data_OS["Vitamin D Intake"] = raw_data_OS["Vitamin D Intake"].replace("Sufficient", 0)
-# Insufficient - 1
-raw_data_OS["Vitamin D Intake"] = raw_data_OS["Vitamin D Intake"].replace("Insufficient", 1)
-
-# Active - 0
-raw_data_OS["Physical Activity"] = raw_data_OS["Physical Activity"].replace("Active", 0)
-# Sedentary - 1
-raw_data_OS["Physical Activity"] = raw_data_OS["Physical Activity"].replace("Sedentary", 1)
-
-# No - 0
-raw_data_OS["Smoking"] = raw_data_OS["Smoking"].replace("No", 0)
-# Yes - 1
-raw_data_OS["Smoking"] = raw_data_OS["Smoking"].replace("Yes", 1)
-
-# nan - 0
-raw_data_OS["Alcohol Consumption"] = raw_data_OS["Alcohol Consumption"].replace(np.nan, 0)
-# Moderate - 1
-raw_data_OS["Alcohol Consumption"] = raw_data_OS["Alcohol Consumption"].replace("Moderate", 1)
-
-# nan - 0
-raw_data_OS["Medical Conditions"] = raw_data_OS["Medical Conditions"].replace(np.nan, 0)
-# Hyperthyroidism - 1
-raw_data_OS["Medical Conditions"] = raw_data_OS["Medical Conditions"].replace("Hyperthyroidism", 1)
-# Rheumatoid Arthritis - 2
-raw_data_OS["Medical Conditions"] = raw_data_OS["Medical Conditions"].replace("Rheumatoid Arthritis", 2)
-
-# nan - 0
-raw_data_OS["Medications"] = raw_data_OS["Medications"].replace(np.nan, 0)
-# Corticosteroids - 1
-raw_data_OS["Medications"] = raw_data_OS["Medications"].replace("Corticosteroids", 1)
-
-# No - 0
-raw_data_OS["Prior Fractures"] = raw_data_OS["Prior Fractures"].replace("No", 0)
-# Yes - 1
-raw_data_OS["Prior Fractures"] = raw_data_OS["Prior Fractures"].replace("Yes", 1)
-
-raw_data_OS = raw_data_OS.drop_duplicates()  # there are 10 duplicates
-
-print("---------------------------------------------------------")
-print("after:")
-
-print(raw_data_OS)
-
-for x in raw_data_OS.columns:
-    print("In %s there are " % x, Counter(raw_data_OS[x]))
-
-data_OS = raw_data_OS.copy()
-
-X_train_OS, X_test_OS, Y_train_OS, Y_test_OS = train_test_split(data_OS.drop(columns="Osteoporosis"),
-                                                                np.array(data_OS["Osteoporosis"]),
-                                                                test_size=test_size, random_state=random_state)
-
-LGRegOS = SGDLogisticRegression()
-LGRegOS.fit(X_train_OS, Y_train_OS)
-
-# see the metrics
+# raw_data_OS = raw_data_OS.drop(columns=["Race/Ethnicity"])
 #
-# result_OS = LGRegOS.predict(X_test_OS, threshold=0.5)
-# print("with 0.5 threshold Accuracy_score:", accuracy_score(Y_test_OS, result_OS))
-# # with 0.5 threshold Accuracy_score: 0.8478632478632478
-# print("with 0.5 threshold Balanced Accuracy_score:", balanced_accuracy_score(Y_test_OS, result_OS))
-# # with 0.5 threshold Balanced Accuracy_score: 0.8484991934918298
+# for x in raw_data_OS.columns:
+#     print("In %s there are " % x, Counter(raw_data_OS[x]))
+# # see the age distribution
+# # plt.scatter(np.arange(1, len(raw_data_OS["Age"]) + 1), raw_data_OS["Age"])
+# # plt.show()
 #
+# # now we have to make all the categorical features numerical
 #
-# best_threshold_Acc = 0
-# best_result_Acc = 0
-# best_threshold_B_Acc = 0
-# best_result_B_Acc = 0
+# # male - 0
+# raw_data_OS["Gender"] = raw_data_OS["Gender"].replace("Male", 0)
+# # female - 1
+# raw_data_OS["Gender"] = raw_data_OS["Gender"].replace("Female", 1)
 #
-# # for the accuracy
-# for x in thresholds:
-#     result_Acc = accuracy_score(Y_test_OS, LGRegOS.predict(X_test_OS, threshold=x))
-#     if (result_Acc > best_result_Acc):
-#         best_result_Acc = result_Acc
-#         best_threshold_Acc = x
+# # normal - 0
+# raw_data_OS["Hormonal Changes"] = raw_data_OS["Hormonal Changes"].replace("Normal", 0)
+# # Postmenopausal - 1
+# raw_data_OS["Hormonal Changes"] = raw_data_OS["Hormonal Changes"].replace("Postmenopausal", 1)
 #
-# # for the balanced accuracy
-# for x in thresholds:
-#     result_B_Acc = balanced_accuracy_score(Y_test_OS, LGRegOS.predict(X_test_OS, threshold=x))
-#     if (result_B_Acc > best_result_B_Acc):
-#         best_result_B_Acc = result_B_Acc
-#         best_threshold_B_Acc = x
+# # No - 0
+# raw_data_OS["Family History"] = raw_data_OS["Family History"].replace("No", 0)
+# # Yes - 1
+# raw_data_OS["Family History"] = raw_data_OS["Family History"].replace("Yes", 1)
 #
-# print(f"The best accuracy is {best_result_Acc} using threshold {best_threshold_Acc}")
-# # The best accuracy is 0.8512820512820513 using threshold 0.48000000000000004
-# print(f"The best balanced accuracy is {best_result_B_Acc} using threshold {best_threshold_B_Acc}")
-# # The best balanced accuracy is 0.851883021249737 using threshold 0.48000000000000004
+# # No - 0
+# raw_data_OS["Family History"] = raw_data_OS["Family History"].replace("No", 0)
+# # Yes - 1
+# raw_data_OS["Family History"] = raw_data_OS["Family History"].replace("Yes", 1)
 #
-# # print(accuracy_score(Y_test_OS, LGRegOS.predict(X_test_OS, threshold=best_threshold_Acc)))
-# print(accuracy_score(Y_test_OS, LGRegOS.predict(X_test_OS, threshold=0.48)))  # 0.8512820512820513
-
-print(LGRegOS.predict(data_OS.head(1).drop(columns="Osteoporosis"), threshold=0.48))
+# # Normal - 0
+# raw_data_OS["Body Weight"] = raw_data_OS["Body Weight"].replace("Normal", 0)
+# # Underweight - 1
+# raw_data_OS["Body Weight"] = raw_data_OS["Body Weight"].replace("Underweight", 1)
+#
+# # Adequate - 0
+# raw_data_OS["Calcium Intake"] = raw_data_OS["Calcium Intake"].replace("Adequate", 0)
+# # Low - 1
+# raw_data_OS["Calcium Intake"] = raw_data_OS["Calcium Intake"].replace("Low", 1)
+#
+# # Sufficient - 0
+# raw_data_OS["Vitamin D Intake"] = raw_data_OS["Vitamin D Intake"].replace("Sufficient", 0)
+# # Insufficient - 1
+# raw_data_OS["Vitamin D Intake"] = raw_data_OS["Vitamin D Intake"].replace("Insufficient", 1)
+#
+# # Active - 0
+# raw_data_OS["Physical Activity"] = raw_data_OS["Physical Activity"].replace("Active", 0)
+# # Sedentary - 1
+# raw_data_OS["Physical Activity"] = raw_data_OS["Physical Activity"].replace("Sedentary", 1)
+#
+# # No - 0
+# raw_data_OS["Smoking"] = raw_data_OS["Smoking"].replace("No", 0)
+# # Yes - 1
+# raw_data_OS["Smoking"] = raw_data_OS["Smoking"].replace("Yes", 1)
+#
+# # nan - 0
+# raw_data_OS["Alcohol Consumption"] = raw_data_OS["Alcohol Consumption"].replace(np.nan, 0)
+# # Moderate - 1
+# raw_data_OS["Alcohol Consumption"] = raw_data_OS["Alcohol Consumption"].replace("Moderate", 1)
+#
+# # nan - 0
+# raw_data_OS["Medical Conditions"] = raw_data_OS["Medical Conditions"].replace(np.nan, 0)
+# # Hyperthyroidism - 1
+# raw_data_OS["Medical Conditions"] = raw_data_OS["Medical Conditions"].replace("Hyperthyroidism", 1)
+# # Rheumatoid Arthritis - 2
+# raw_data_OS["Medical Conditions"] = raw_data_OS["Medical Conditions"].replace("Rheumatoid Arthritis", 2)
+#
+# # nan - 0
+# raw_data_OS["Medications"] = raw_data_OS["Medications"].replace(np.nan, 0)
+# # Corticosteroids - 1
+# raw_data_OS["Medications"] = raw_data_OS["Medications"].replace("Corticosteroids", 1)
+#
+# # No - 0
+# raw_data_OS["Prior Fractures"] = raw_data_OS["Prior Fractures"].replace("No", 0)
+# # Yes - 1
+# raw_data_OS["Prior Fractures"] = raw_data_OS["Prior Fractures"].replace("Yes", 1)
+#
+# raw_data_OS = raw_data_OS.drop_duplicates()  # there are 10 duplicates
+#
+# print("---------------------------------------------------------")
+# print("after:")
+#
+# print(raw_data_OS)
+#
+# for x in raw_data_OS.columns:
+#     print("In %s there are " % x, Counter(raw_data_OS[x]))
+#
+# data_OS = raw_data_OS.copy()
+#
+# X_train_OS, X_test_OS, Y_train_OS, Y_test_OS = train_test_split(data_OS.drop(columns="Osteoporosis"),
+#                                                                 np.array(data_OS["Osteoporosis"]),
+#                                                                 test_size=test_size, random_state=random_state)
+#
+# LGRegOS = SGDLogisticRegression()
+# LGRegOS.fit(X_train_OS, Y_train_OS)
+#
+# # see the metrics
+# #
+# # result_OS = LGRegOS.predict(X_test_OS, threshold=0.5)
+# # print("with 0.5 threshold Accuracy_score:", accuracy_score(Y_test_OS, result_OS))
+# # # with 0.5 threshold Accuracy_score: 0.8478632478632478
+# # print("with 0.5 threshold Balanced Accuracy_score:", balanced_accuracy_score(Y_test_OS, result_OS))
+# # # with 0.5 threshold Balanced Accuracy_score: 0.8484991934918298
+# #
+# #
+# # best_threshold_Acc = 0
+# # best_result_Acc = 0
+# # best_threshold_B_Acc = 0
+# # best_result_B_Acc = 0
+# #
+# # # for the accuracy
+# # for x in thresholds:
+# #     result_Acc = accuracy_score(Y_test_OS, LGRegOS.predict(X_test_OS, threshold=x))
+# #     if (result_Acc > best_result_Acc):
+# #         best_result_Acc = result_Acc
+# #         best_threshold_Acc = x
+# #
+# # # for the balanced accuracy
+# # for x in thresholds:
+# #     result_B_Acc = balanced_accuracy_score(Y_test_OS, LGRegOS.predict(X_test_OS, threshold=x))
+# #     if (result_B_Acc > best_result_B_Acc):
+# #         best_result_B_Acc = result_B_Acc
+# #         best_threshold_B_Acc = x
+# #
+# # print(f"The best accuracy is {best_result_Acc} using threshold {best_threshold_Acc}")
+# # # The best accuracy is 0.8512820512820513 using threshold 0.48000000000000004
+# # print(f"The best balanced accuracy is {best_result_B_Acc} using threshold {best_threshold_B_Acc}")
+# # # The best balanced accuracy is 0.851883021249737 using threshold 0.48000000000000004
+# #
+# # # print(accuracy_score(Y_test_OS, LGRegOS.predict(X_test_OS, threshold=best_threshold_Acc)))
+# # print(accuracy_score(Y_test_OS, LGRegOS.predict(X_test_OS, threshold=0.48)))  # 0.8512820512820513
+#
+# print(LGRegOS.predict(data_OS.head(1).drop(columns="Osteoporosis"), threshold=0.48))
