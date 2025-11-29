@@ -6,7 +6,20 @@ server:
   port: 8084
 
 model:
-  url: ${MODEL_URL}
-  apikey: ${API_KEY}
+  url: http://localhost:80
+  apikey:
+
+feign:
+  client:
+    config:
+      default:
+        decode404: true
+        encoder: org.springframework.cloud.openfeign.support.SpringEncoder
+        defaultRequestHeaders:
+          Content-Type: application/json
+  jackson:
+    encoder:
+      mapper:
+        serializationInclusion: ALWAYS
 
 # add monitoring and database configurations
