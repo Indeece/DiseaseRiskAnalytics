@@ -33,16 +33,13 @@ public class GatewayConfig {
                         .uri("lb://auth-service")
                 )
 
-                // TODO add public endpoints for other services
-
-                /*
-                .route("income-expense-service", r -> r.path("/api/**")
+                .route("heart-disease-api", r -> r.path("/api/**")
                         .filters(f -> f.filter(jwtAuthFilter.apply(
-                                new JwtAuthenticationFilter.Config().setPublicEndpoints(List.of())
+                                new JwtAuthenticationFilter.Config().setPublicEndpoints(PUBLIC_ENDPOINTS)
                         )))
-                        .uri("lb://income-expense-service")
+                        .uri("lb://heart-disease-api")
                 )
-                */
+
                 .build();
     }
 
