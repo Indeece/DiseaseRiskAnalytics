@@ -22,4 +22,11 @@ feign:
       mapper:
         serializationInclusion: ALWAYS
 
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka
+
 # add monitoring and database configurations
