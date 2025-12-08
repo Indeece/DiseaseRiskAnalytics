@@ -1,9 +1,26 @@
 
 services:
-  regressor:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: regressor
+  diabetes_server:
+    build: .
+    command: ["uvicorn", "serverDIAB:app", "--host", "127.0.0.1", "--port", "80"]
     ports:
-      - "80:80"
+      - "81:80"
+    volumes:
+      - .:/app
+  chd_server:
+    build: .
+    command: ["uvicorn", "serverCHD:app", "--host", "127.0.0.1", "--port", "80"]
+    ports:
+      - "82:80"
+    volumes:
+      - .:/app
+  os_server:
+    build: .
+    command: ["uvicorn", "serverOS:app", "--host", "127.0.0.1", "--port", "80"]
+    ports:
+      - "83:80"
+    volumes:
+      - .:/app
+
+# Run uvicorn server
+# CMD ["uvicorn", "server:app", "--reload", "--host", "127.0.0.1", "--port", "80"]

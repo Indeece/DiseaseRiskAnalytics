@@ -3,8 +3,8 @@ FROM python:3.9
 
 # Copy files to the container
 COPY *.py /app/
+COPY *.csv /app/
 COPY requirements.txt /app/
-COPY framingham.csv /app/
 
 # Set working directory to previously added app directory
 WORKDIR /app/
@@ -12,11 +12,8 @@ WORKDIR /app/
 # Install dependencies
 RUN pip install -r requirements.txt
 
-# Train and save ML model to the working dir
+# Train and save three ML models to the working dir
 RUN python PipeLineLogisticRegression.py
 
 # Expose the port uvicorn is running on
 EXPOSE 80
-
-# Run uvicorn server
-CMD ["uvicorn", "server:app", "--reload", "--host", "127.0.0.1", "--port", "80"]

@@ -83,6 +83,7 @@ data_train_CHD, data_test_CHD, Y_train_CHD, Y_test_CHD = train_test_split(data_C
                                                                           test_size=test_size,
                                                                           random_state=random_state)
 LGRegCHD = SGDLogisticRegression()  # our logistic Regression
+print(data_train_CHD)
 LGRegCHD.fit(data_train_CHD, Y_train_CHD)
 
 joblib.dump(LGRegCHD, "./LGRegCHD.joblib")
@@ -241,82 +242,84 @@ The model with correct gradient:
 # #     print(f"{x} and CHD: ", y1.corr(x1))
 
 
-# #
-# # DIABETES PIPELINE
-# #
 #
-# '''
-# Pregnancies: Number of times the patient has been pregnant.
+# DIABETES PIPELINE
 #
-# Glucose: Plasma glucose concentration after a 2-hour oral glucose tolerance test.
-#
-# BloodPressure: Diastolic blood pressure (mm Hg).
-#
-# SkinThickness: Triceps skinfold thickness (mm).
-#
-# Insulin: 2-hour serum insulin (mu U/ml).
-#
-# BMI: Body mass index (weight in kg/(height in m)^2).
-#
-# DiabetesPedigreeFunction: A function that represents the patient’s diabetes pedigree (i.e., likelihood of diabetes
-# based on family history).
-#
-# Age: Age of the patient (years).
-#
-# Outcome: Binary outcome (0 or 1) where 1 indicates the presence of diabetes and 0 indicates the absence.
-# '''
-#
-# raw_data_DIAB = pd.read_csv("diabetes_dataset.csv")
-# # this is too much to ask from a client
-# raw_data_DIAB = raw_data_DIAB.drop(columns=["DiabetesPedigreeFunction", "SkinThickness"])
-#
+
+'''
+Pregnancies: Number of times the patient has been pregnant.
+
+Glucose: Plasma glucose concentration after a 2-hour oral glucose tolerance test.
+
+BloodPressure: Diastolic blood pressure (mm Hg).
+
+SkinThickness: Triceps skinfold thickness (mm).
+
+Insulin: 2-hour serum insulin (mu U/ml).
+
+BMI: Body mass index (weight in kg/(height in m)^2).
+
+DiabetesPedigreeFunction: A function that represents the patient’s diabetes pedigree (i.e., likelihood of diabetes
+based on family history).
+
+Age: Age of the patient (years).
+
+Outcome: Binary outcome (0 or 1) where 1 indicates the presence of diabetes and 0 indicates the absence.
+'''
+
+raw_data_DIAB = pd.read_csv("diabetes_dataset.csv")
+# this is too much to ask from a client
+raw_data_DIAB = raw_data_DIAB.drop(columns=["DiabetesPedigreeFunction", "SkinThickness"])
+
 # print(raw_data_DIAB)
+
+# see which variety of data there is
+
+# for x in raw_data_DIAB.columns:
+#     print("In %s there are " % x, Counter(raw_data_DIAB[x]))
+# for x in raw_data_DIAB.columns:
+#     plt.scatter(range(0, len(raw_data_DIAB[x])), raw_data_DIAB[x])
+#     plt.title(f"The variety of data from {x}")
+#     plt.xlabel("sample №")
+#     plt.ylabel(f"corresponding data of {x}")
+#     plt.show()
+
+# now we see, that some glucose, blood pressure, insulin, BMI levels are zero, that can't be right
+# the fix is to set them to median
+
+# see if there are Nones in dataset
+
+# for x in raw_data_DIAB.columns:
+#     print(Counter(raw_data_DIAB[x].isna()))
+
+# no, ironically, there are NONE, did you get it?
+
+# replace all zeros to the median of the corresponding column
+for x in raw_data_DIAB.drop(columns="Outcome").columns:
+    raw_data_DIAB[x] = raw_data_DIAB[x].replace(0, raw_data_DIAB[x].median())
+
+# watch again how they disappear
+
+# for x in raw_data_DIAB.columns:
+#     plt.scatter(range(0, len(raw_data_DIAB[x])), raw_data_DIAB[x])
+#     plt.title(f"The variety of data from {x}")
+#     plt.xlabel("sample №")
+#     plt.ylabel(f"corresponding data of {x}")
+#     plt.show()
 #
-# # see which variety of data there is
-#
-# # for x in raw_data_DIAB.columns:
-# #     print("In %s there are " % x, Counter(raw_data_DIAB[x]))
-# # for x in raw_data_DIAB.columns:
-# #     plt.scatter(range(0, len(raw_data_DIAB[x])), raw_data_DIAB[x])
-# #     plt.title(f"The variety of data from {x}")
-# #     plt.xlabel("sample №")
-# #     plt.ylabel(f"corresponding data of {x}")
-# #     plt.show()
-#
-# # now we see, that some glucose, blood pressure, insulin, BMI levels are zero, that can't be right
-# # the fix is to set them to median
-#
-# # see if there are Nones in dataset
-#
-# # for x in raw_data_DIAB.columns:
-# #     print(Counter(raw_data_DIAB[x].isna()))
-#
-# # no, ironically, there are NONE, did you get it?
-#
-# # replace all zeros to the median of the corresponding column
-# for x in raw_data_DIAB.drop(columns="Outcome").columns:
-#     raw_data_DIAB[x] = raw_data_DIAB[x].replace(0, raw_data_DIAB[x].median())
-#
-# # watch again how they disappear
-#
-# # for x in raw_data_DIAB.columns:
-# #     plt.scatter(range(0, len(raw_data_DIAB[x])), raw_data_DIAB[x])
-# #     plt.title(f"The variety of data from {x}")
-# #     plt.xlabel("sample №")
-# #     plt.ylabel(f"corresponding data of {x}")
-# #     plt.show()
-# #
-# # print(raw_data_DIAB.drop_duplicates())  # there are no any duplicates
-#
-# data_DIAB = raw_data_DIAB.copy()
-#
-# X_train_DIAB, X_test_DIAB, Y_train_DIAB, Y_test_DIAB = train_test_split(data_DIAB.drop("Outcome", axis=1),
-#                                                                         np.array(data_DIAB["Outcome"]),
-#                                                                         test_size=test_size, random_state=random_state)
-# # train the new model
-# LGRegDIAB = SGDLogisticRegression()
-# LGRegDIAB.fit(X_train_DIAB, Y_train_DIAB)
-#
+# print(raw_data_DIAB.drop_duplicates())  # there are no any duplicates
+
+data_DIAB = raw_data_DIAB.copy()
+
+X_train_DIAB, X_test_DIAB, Y_train_DIAB, Y_test_DIAB = train_test_split(data_DIAB.drop("Outcome", axis=1),
+                                                                        np.array(data_DIAB["Outcome"]),
+                                                                        test_size=test_size, random_state=random_state)
+# train the new model
+LGRegDIAB = SGDLogisticRegression()
+print(X_train_DIAB)
+LGRegDIAB.fit(X_train_DIAB, Y_train_DIAB)
+
+joblib.dump(LGRegDIAB, "./LGRegDIAB.joblib")
 # # see new metrics
 # result_DIAB = LGRegDIAB.predict(X_test_DIAB, threshold=0.5)
 # print("with 0.5 threshold Accuracy_score:", accuracy_score(Y_test_DIAB, result_DIAB))
@@ -358,94 +361,88 @@ The model with correct gradient:
 
 
 
-# #
-# # OSTEOPOROSIS PIPELINE
-# #
 #
-# raw_data_OS = pd.read_csv("osteoporosis.csv")
+# OSTEOPOROSIS PIPELINE
+#
+
+raw_data_OS = pd.read_csv("osteoporosis.csv")
 # print("---------------------------------------------------------")
 # print("before any cleaning:")
 # print(raw_data_OS)
-# raw_data_OS = raw_data_OS.drop(columns="Id")
-#
-# raw_data_OS = raw_data_OS.drop(columns=["Race/Ethnicity"])
+raw_data_OS = raw_data_OS.drop(columns="Id")
+
+raw_data_OS = raw_data_OS.drop(columns=["Race/Ethnicity"])
 #
 # for x in raw_data_OS.columns:
 #     print("In %s there are " % x, Counter(raw_data_OS[x]))
-# # see the age distribution
-# # plt.scatter(np.arange(1, len(raw_data_OS["Age"]) + 1), raw_data_OS["Age"])
-# # plt.show()
-#
-# # now we have to make all the categorical features numerical
-#
-# # male - 0
-# raw_data_OS["Gender"] = raw_data_OS["Gender"].replace("Male", 0)
-# # female - 1
-# raw_data_OS["Gender"] = raw_data_OS["Gender"].replace("Female", 1)
-#
-# # normal - 0
-# raw_data_OS["Hormonal Changes"] = raw_data_OS["Hormonal Changes"].replace("Normal", 0)
-# # Postmenopausal - 1
-# raw_data_OS["Hormonal Changes"] = raw_data_OS["Hormonal Changes"].replace("Postmenopausal", 1)
-#
-# # No - 0
-# raw_data_OS["Family History"] = raw_data_OS["Family History"].replace("No", 0)
-# # Yes - 1
-# raw_data_OS["Family History"] = raw_data_OS["Family History"].replace("Yes", 1)
-#
-# # No - 0
-# raw_data_OS["Family History"] = raw_data_OS["Family History"].replace("No", 0)
-# # Yes - 1
-# raw_data_OS["Family History"] = raw_data_OS["Family History"].replace("Yes", 1)
-#
-# # Normal - 0
-# raw_data_OS["Body Weight"] = raw_data_OS["Body Weight"].replace("Normal", 0)
-# # Underweight - 1
-# raw_data_OS["Body Weight"] = raw_data_OS["Body Weight"].replace("Underweight", 1)
-#
-# # Adequate - 0
-# raw_data_OS["Calcium Intake"] = raw_data_OS["Calcium Intake"].replace("Adequate", 0)
-# # Low - 1
-# raw_data_OS["Calcium Intake"] = raw_data_OS["Calcium Intake"].replace("Low", 1)
-#
-# # Sufficient - 0
-# raw_data_OS["Vitamin D Intake"] = raw_data_OS["Vitamin D Intake"].replace("Sufficient", 0)
-# # Insufficient - 1
-# raw_data_OS["Vitamin D Intake"] = raw_data_OS["Vitamin D Intake"].replace("Insufficient", 1)
-#
-# # Active - 0
-# raw_data_OS["Physical Activity"] = raw_data_OS["Physical Activity"].replace("Active", 0)
-# # Sedentary - 1
-# raw_data_OS["Physical Activity"] = raw_data_OS["Physical Activity"].replace("Sedentary", 1)
-#
-# # No - 0
-# raw_data_OS["Smoking"] = raw_data_OS["Smoking"].replace("No", 0)
-# # Yes - 1
-# raw_data_OS["Smoking"] = raw_data_OS["Smoking"].replace("Yes", 1)
-#
-# # nan - 0
-# raw_data_OS["Alcohol Consumption"] = raw_data_OS["Alcohol Consumption"].replace(np.nan, 0)
-# # Moderate - 1
-# raw_data_OS["Alcohol Consumption"] = raw_data_OS["Alcohol Consumption"].replace("Moderate", 1)
-#
-# # nan - 0
-# raw_data_OS["Medical Conditions"] = raw_data_OS["Medical Conditions"].replace(np.nan, 0)
-# # Hyperthyroidism - 1
-# raw_data_OS["Medical Conditions"] = raw_data_OS["Medical Conditions"].replace("Hyperthyroidism", 1)
-# # Rheumatoid Arthritis - 2
-# raw_data_OS["Medical Conditions"] = raw_data_OS["Medical Conditions"].replace("Rheumatoid Arthritis", 2)
-#
-# # nan - 0
-# raw_data_OS["Medications"] = raw_data_OS["Medications"].replace(np.nan, 0)
-# # Corticosteroids - 1
-# raw_data_OS["Medications"] = raw_data_OS["Medications"].replace("Corticosteroids", 1)
-#
-# # No - 0
-# raw_data_OS["Prior Fractures"] = raw_data_OS["Prior Fractures"].replace("No", 0)
-# # Yes - 1
-# raw_data_OS["Prior Fractures"] = raw_data_OS["Prior Fractures"].replace("Yes", 1)
-#
-# raw_data_OS = raw_data_OS.drop_duplicates()  # there are 10 duplicates
+# see the age distribution
+# plt.scatter(np.arange(1, len(raw_data_OS["Age"]) + 1), raw_data_OS["Age"])
+# plt.show()
+
+# now we have to make all the categorical features numerical
+
+# male - 0
+raw_data_OS["Gender"] = raw_data_OS["Gender"].replace("Male", 0)
+# female - 1
+raw_data_OS["Gender"] = raw_data_OS["Gender"].replace("Female", 1)
+
+# normal - 0
+raw_data_OS["Hormonal Changes"] = raw_data_OS["Hormonal Changes"].replace("Normal", 0)
+# Postmenopausal - 1
+raw_data_OS["Hormonal Changes"] = raw_data_OS["Hormonal Changes"].replace("Postmenopausal", 1)
+
+# No - 0
+raw_data_OS["Family History"] = raw_data_OS["Family History"].replace("No", 0)
+# Yes - 1
+raw_data_OS["Family History"] = raw_data_OS["Family History"].replace("Yes", 1)
+
+# Normal - 0
+raw_data_OS["Body Weight"] = raw_data_OS["Body Weight"].replace("Normal", 0)
+# Underweight - 1
+raw_data_OS["Body Weight"] = raw_data_OS["Body Weight"].replace("Underweight", 1)
+
+# Adequate - 0
+raw_data_OS["Calcium Intake"] = raw_data_OS["Calcium Intake"].replace("Adequate", 0)
+# Low - 1
+raw_data_OS["Calcium Intake"] = raw_data_OS["Calcium Intake"].replace("Low", 1)
+
+# Sufficient - 0
+raw_data_OS["Vitamin D Intake"] = raw_data_OS["Vitamin D Intake"].replace("Sufficient", 0)
+# Insufficient - 1
+raw_data_OS["Vitamin D Intake"] = raw_data_OS["Vitamin D Intake"].replace("Insufficient", 1)
+
+# Active - 0
+raw_data_OS["Physical Activity"] = raw_data_OS["Physical Activity"].replace("Active", 0)
+# Sedentary - 1
+raw_data_OS["Physical Activity"] = raw_data_OS["Physical Activity"].replace("Sedentary", 1)
+
+# No - 0
+raw_data_OS["Smoking"] = raw_data_OS["Smoking"].replace("No", 0)
+# Yes - 1
+raw_data_OS["Smoking"] = raw_data_OS["Smoking"].replace("Yes", 1)
+
+# nan - 0
+raw_data_OS["Alcohol Consumption"] = raw_data_OS["Alcohol Consumption"].replace(np.nan, 0)
+# Moderate - 1
+raw_data_OS["Alcohol Consumption"] = raw_data_OS["Alcohol Consumption"].replace("Moderate", 1)
+# nan - 0
+raw_data_OS["Medical Conditions"] = raw_data_OS["Medical Conditions"].replace(np.nan, 0)
+# Hyperthyroidism - 1
+raw_data_OS["Medical Conditions"] = raw_data_OS["Medical Conditions"].replace("Hyperthyroidism", 1)
+# Rheumatoid Arthritis - 2
+raw_data_OS["Medical Conditions"] = raw_data_OS["Medical Conditions"].replace("Rheumatoid Arthritis", 2)
+
+# nan - 0
+raw_data_OS["Medications"] = raw_data_OS["Medications"].replace(np.nan, 0)
+# Corticosteroids - 1
+raw_data_OS["Medications"] = raw_data_OS["Medications"].replace("Corticosteroids", 1)
+
+# No - 0
+raw_data_OS["Prior Fractures"] = raw_data_OS["Prior Fractures"].replace("No", 0)
+# Yes - 1
+raw_data_OS["Prior Fractures"] = raw_data_OS["Prior Fractures"].replace("Yes", 1)
+
+raw_data_OS = raw_data_OS.drop_duplicates()  # there are 10 duplicates
 #
 # print("---------------------------------------------------------")
 # print("after:")
@@ -454,16 +451,19 @@ The model with correct gradient:
 #
 # for x in raw_data_OS.columns:
 #     print("In %s there are " % x, Counter(raw_data_OS[x]))
-#
-# data_OS = raw_data_OS.copy()
-#
-# X_train_OS, X_test_OS, Y_train_OS, Y_test_OS = train_test_split(data_OS.drop(columns="Osteoporosis"),
-#                                                                 np.array(data_OS["Osteoporosis"]),
-#                                                                 test_size=test_size, random_state=random_state)
-#
-# LGRegOS = SGDLogisticRegression()
-# LGRegOS.fit(X_train_OS, Y_train_OS)
-#
+
+data_OS = raw_data_OS.copy()
+
+X_train_OS, X_test_OS, Y_train_OS, Y_test_OS = train_test_split(data_OS.drop(columns="Osteoporosis"),
+                                                                np.array(data_OS["Osteoporosis"]),
+                                                                test_size=test_size, random_state=random_state)
+
+LGRegOS = SGDLogisticRegression()
+print(X_train_OS)
+print(Counter(X_test_OS["Medical Conditions"]))
+LGRegOS.fit(X_train_OS, Y_train_OS)
+
+joblib.dump(LGRegOS, "./LGRegOS.joblib")
 # # see the metrics
 # #
 # # result_OS = LGRegOS.predict(X_test_OS, threshold=0.5)
