@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: diabetes-api
+
+server:
+  port: 8084
+
+model:
+  url: http://localhost:80
+  apikey:
+
+feign:
+  client:
+    config:
+      default:
+        decode404: true
+        encoder: org.springframework.cloud.openfeign.support.SpringEncoder
+        defaultRequestHeaders:
+          Content-Type: application/json
+  jackson:
+    encoder:
+      mapper:
+        serializationInclusion: ALWAYS
+
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka
