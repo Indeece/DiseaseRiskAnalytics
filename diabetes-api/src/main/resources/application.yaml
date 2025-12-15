@@ -3,10 +3,10 @@ spring:
     name: diabetes-api
 
 server:
-  port: 8084
+  port: 8083
 
 model:
-  url: http://localhost:80
+  url: http://localhost:70
   apikey:
 
 feign:
