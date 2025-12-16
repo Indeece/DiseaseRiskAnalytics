@@ -40,6 +40,13 @@ public class GatewayConfig {
                         .uri("lb://heart-disease-api")
                 )
 
+                .route("diabetes-api", r -> r.path("/api/**")
+                        .filters(f -> f.filter(jwtAuthFilter.apply(
+                                new JwtAuthenticationFilter.Config().setPublicEndpoints(PUBLIC_ENDPOINTS)
+                        )))
+                        .uri("lb://heart-disease-api")
+                )
+
                 .build();
     }
 
