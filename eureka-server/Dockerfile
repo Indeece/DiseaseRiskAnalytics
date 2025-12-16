@@ -1,5 +1,10 @@
-FROM openjdk:21-jdk-slim
+FROM maven:3.9.4-eclipse-temurin-21 AS build
 WORKDIR /app
-COPY target/eureka-server-0.0.1-SNAPSHOT.jar eureka-server.jar
+COPY . .
+RUN mvn clean package -DskipTests
+
+FROM eclipse-temurin:21-jdk-jammy
+WORKDIR /app
+COPY --from=build /app/target/*.jar eureka-server.jar
 EXPOSE 8761
 ENTRYPOINT ["java", "-jar", "eureka-server.jar"]

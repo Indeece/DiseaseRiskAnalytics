@@ -3,8 +3,8 @@ WORKDIR /app
 COPY . .
 RUN mvn clean package -DskipTests
 
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jdk-jammy
 WORKDIR /app
 COPY --from=build /app/target/*.jar api-gateway.jar
-EXPOSE 8081
+EXPOSE 4000
 ENTRYPOINT ["java", "-jar", "api-gateway.jar"]
