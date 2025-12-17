@@ -6,7 +6,7 @@ import ru.indeece.heartdiseaseapi.dto.RiskRequest;
 import ru.indeece.heartdiseaseapi.services.ModelService;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/heart")
 @RequiredArgsConstructor
 public class ModelController {
 
