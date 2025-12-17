@@ -1,26 +1,42 @@
 
+networks:
+  risk-diseases:
+    external: true
+
+
 services:
   diabetes_server:
+    container_name: diabetes_server
     build: .
-    command: ["uvicorn", "serverDIAB:app", "--host", "127.0.0.1", "--port", "80"]
+    command: ["uvicorn", "serverDIAB:app", "--host", "0.0.0.0", "--port", "80"]
     ports:
       - "81:80"
     volumes:
       - .:/app
+    networks:
+      - risk-diseases
+
   chd_server:
+    container_name: chd_server
     build: .
-    command: ["uvicorn", "serverCHD:app", "--host", "127.0.0.1", "--port", "80"]
+    command: ["uvicorn", "serverCHD:app", "--host", "0.0.0.0", "--port", "80"]
     ports:
       - "82:80"
     volumes:
       - .:/app
+    networks:
+      - risk-diseases
+
   os_server:
+    container_name: os_server
     build: .
-    command: ["uvicorn", "serverOS:app", "--host", "127.0.0.1", "--port", "80"]
+    command: ["uvicorn", "serverOS:app", "--host", "0.0.0.0", "--port", "80"]
     ports:
       - "83:80"
     volumes:
       - .:/app
-
+    networks:
+      - risk-diseases
+      
 # Run uvicorn server
 # CMD ["uvicorn", "server:app", "--reload", "--host", "127.0.0.1", "--port", "80"]
