@@ -11,21 +11,21 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.ALWAYS)
 public class DiabetesRiskRequest {
-    @JsonProperty("pregnancies")
+    @JsonProperty("Pregnancies")
     private int pregnancies;
 
-    @JsonProperty("glucose")
+    @JsonProperty("Glucose")
     private float glucose;
 
-    @JsonProperty("bloodPressure")
+    @JsonProperty("BloodPressure")
     private int bloodPressure;
 
-    @JsonProperty("insulin")
+    @JsonProperty("Insulin")
     private float insulin;
 
-    @JsonProperty("bmi")
+    @JsonProperty("BMI")
     private float bmi;
 
-    @JsonProperty("age")
+    @JsonProperty("Age")
     private int age;
 }
