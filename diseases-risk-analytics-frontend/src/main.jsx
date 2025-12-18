@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import DiabetesForm from "./DiabetesForm.jsx";
 import HealthForm from "./HealthForm.jsx";
 import Authorization from "./Authorization.jsx";
 import Registration from "./Registration.jsx";
@@ -41,6 +42,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="/login" element={<Authorization />} />
             <Route path="/register" element={<Registration />} />
             <Route path="/health" element={<HealthForm />} />
+            <Route path="/diabetes" element={<DiabetesForm />} />
           </Routes>
         </div>
 
