@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from './context/AuthContext';
+import API_CONFIG from './config';
 
 export default function DiabetesForm() {
-  const { user, token } = useAuth(); // Добавляем useAuth для получения данных пользователя и токена
+  const { user, token } = useAuth();
   
   const [formData, setFormData] = useState({
     Pregnancies: '',
@@ -14,7 +15,7 @@ export default function DiabetesForm() {
   });
   
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -24,7 +25,6 @@ export default function DiabetesForm() {
       [name]: value,
     }));
     setError('');
-    setSuccess('');
   };
 
   // Функция валидации данных
@@ -43,7 +43,6 @@ export default function DiabetesForm() {
         return false;
       }
       
-      // Проверка на отрицательные значения
       if (numValue < 0) {
         setError(`Поле "${field}" не может быть отрицательным`);
         return false;
@@ -51,6 +50,22 @@ export default function DiabetesForm() {
     }
     
     return true;
+  };
+
+  // Функция интерпретации результата диабета
+  const interpretDiabetesRisk = (riskValue) => {
+    // Предполагаем, что riskValue от 0 до 1
+    const percentage = riskValue * 100;
+    
+    if (percentage < 30) {
+      return { level: "Низкий", color: "bg-green-100 text-green-800" };
+    } else if (percentage < 60) {
+      return { level: "Умеренный", color: "bg-yellow-100 text-yellow-800" };
+    } else if (percentage < 80) {
+      return { level: "Высокий", color: "bg-orange-100 text-orange-800" };
+    } else {
+      return { level: "Очень высокий", color: "bg-red-100 text-red-800" };
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -62,7 +77,7 @@ export default function DiabetesForm() {
     
     setLoading(true);
     setError('');
-    setSuccess('');
+    setResult(null);
     
     try {
       const payload = {
@@ -74,10 +89,10 @@ export default function DiabetesForm() {
         Age: parseInt(formData.Age, 10),
       };
 
-      console.log('Отправка данных для модели диабета:', payload);
+      console.log('Отправка данных для диабета:', payload);
       
-      // Отправка данных на защищенный эндпоинт
-      const response = await fetch('http://localhost:4000/api/diabetes/risk', {
+      // Отправка данных через Eureka Gateway
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.PATHS.DIABETES.PREDICT}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -87,21 +102,19 @@ export default function DiabetesForm() {
       });
 
       if (response.ok) {
-        const result = await response.json();
-        console.log('Результат от сервера:', result);
+        const riskValue = await response.json(); // Получаем Double
         
-        // В зависимости от ответа сервера
-        setSuccess('Данные успешно отправлены! Результат: ' + (result.prediction || 'обработка завершена'));
+        // Преобразуем в проценты
+        const riskPercentage = Math.round(riskValue * 10000) / 100;
+        const interpretation = interpretDiabetesRisk(riskValue);
         
-        // Можно сбросить форму после успешной отправки
-        // setFormData({
-        //   Pregnancies: '',
-        //   Glucose: '',
-        //   BloodPressure: '',
-        //   Insulin: '',
-        //   BMI: '',
-        //   Age: ''
-        // });
+        console.log('Получен риск диабета:', riskValue, 'Процент:', riskPercentage + '%');
+        
+        setResult({
+          raw: riskValue,
+          percentage: riskPercentage,
+          interpretation: interpretation
+        });
       } else {
         const errorText = await response.text();
         setError(`Ошибка отправки: ${errorText}`);
@@ -114,13 +127,95 @@ export default function DiabetesForm() {
     }
   };
 
+  // Сброс формы
+  const resetForm = () => {
+    setFormData({
+      Pregnancies: '',
+      Glucose: '',
+      BloodPressure: '',
+      Insulin: '',
+      BMI: '',
+      Age: ''
+    });
+    setError('');
+    setResult(null);
+    setLoading(false);
+  };
+
   // Общий класс для инпутов
   const inputClassName = "w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-black disabled:bg-gray-100";
+
+  // Отображение результата
+  if (result) {
+    return (
+      <div className="bg-white p-8 rounded-2xl shadow-lg border border-slate-100 w-full max-w-md mx-auto">
+        <h2 className="text-2xl font-bold text-slate-800 mb-2 text-center">
+          Результат анализа
+        </h2>
+        
+        <p className="text-gray-600 text-sm mb-6 text-center">
+          Пользователь: {user?.username}
+        </p>
+
+        <div className="bg-gray-50 p-6 rounded-xl mb-6">
+          <div className="text-center mb-6">
+            <div className="text-4xl font-bold text-blue-600 mb-2">
+              {result.percentage.toFixed(2)}%
+            </div>
+            <div className="text-lg font-semibold text-gray-800">
+              Риск развития диабета
+            </div>
+          </div>
+
+          <div className={`p-4 rounded-lg text-center mb-6 ${result.interpretation.color}`}>
+            <div className="font-bold text-lg mb-1">{result.interpretation.level} риск</div>
+            <div className="text-sm">
+              {result.interpretation.level === "Низкий" ? "Вероятность диабета минимальна" :
+               result.interpretation.level === "Умеренный" ? "Рекомендуется наблюдение" :
+               result.interpretation.level === "Высокий" ? "Необходима консультация врача" :
+               "Срочно обратитесь к эндокринологу"}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="bg-white p-3 rounded-lg">
+              <div className="text-gray-500">Исходное значение</div>
+              <div className="font-bold">{result.raw.toFixed(4)}</div>
+            </div>
+            <div className="bg-white p-3 rounded-lg">
+              <div className="text-gray-500">Процент риска</div>
+              <div className="font-bold">{result.percentage.toFixed(2)}%</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-sm text-gray-600 mb-6">
+          <p className="mb-2">⚠️ <strong>Важно:</strong> Результат основан на математической модели и не заменяет консультацию врача.</p>
+          <p>Для точной диагностики обратитесь к эндокринологу.</p>
+        </div>
+
+        <div className="flex gap-4">
+          <button
+            onClick={resetForm}
+            className="flex-1 bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 font-semibold"
+          >
+            Новый анализ
+          </button>
+          <button
+            onClick={() => window.print()}
+            className="flex-1 bg-gray-300 text-black py-3 rounded-md hover:bg-gray-400 font-semibold"
+          >
+            Распечатать
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form 
       onSubmit={handleSubmit} 
-      className="bg-white p-8 rounded-2xl shadow-lg border border-slate-100 w-full"
+      className="bg-white p-8 rounded-2xl shadow-lg border border-slate-100 w-full max-w-md mx-auto"
     >
       <h2 className="text-2xl font-bold text-slate-800 mb-2 text-center">
         Проверка на диабет
@@ -130,16 +225,9 @@ export default function DiabetesForm() {
         Пользователь: {user?.username}
       </p>
 
-      {/* Сообщения об ошибках и успехе */}
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
           {error}
-        </div>
-      )}
-      
-      {success && (
-        <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
-          {success}
         </div>
       )}
 
@@ -266,13 +354,13 @@ export default function DiabetesForm() {
         disabled={loading}
         className="w-full mt-8 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors shadow-md disabled:bg-blue-400 disabled:cursor-not-allowed"
       >
-        {loading ? 'Отправка...' : 'Проверить'}
+        {loading ? 'Анализ...' : 'Проверить'}
       </button>
       
       {/* Информация о формате данных */}
       <div className="mt-4 text-xs text-gray-500">
         <p>Все поля обязательны для заполнения.</p>
-        <p>Данные отправляются на защищенный сервер для анализа.</p>
+        <p>Данные отправляются через Eureka Gateway на сервис анализа диабета.</p>
       </div>
     </form>
   );

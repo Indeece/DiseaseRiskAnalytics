@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "./context/AuthContext";
+import { useAuth } from './context/AuthContext';
+import API_CONFIG from './config';
 
 export default function HealthForm() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const questions = [
     { key: "male", label: "Ваш пол", type: "choice", options: ["Мужской", "Женский"], values: [1, 0] },
     { key: "age", label: "Ваш возраст", type: "number" },
@@ -24,34 +25,90 @@ export default function HealthForm() {
   const [step, setStep] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const [error, setError] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const current = questions[step];
 
   // Функция для отправки данных на сервер
   const submitFormData = async (formData) => {
+    setLoading(true);
+    setError("");
+    
     try {
-      const token = localStorage.getItem('accessToken');
-      const response = await fetch('http://localhost:4000/api/risk', {
+      // Преобразуем данные в числовые значения
+      const payload = {
+        male: parseInt(formData.male) || 0,
+        age: parseInt(formData.age) || 0,
+        currentSmoker: parseInt(formData.currentSmoker) || 0,
+        cigsPerDay: parseInt(formData.cigsPerDay) || 0,
+        BPMeds: parseInt(formData.BPMeds) || 0,
+        prevalentStroke: parseInt(formData.prevalentStroke) || 0,
+        prevalentHyp: parseInt(formData.prevalentHyp) || 0,
+        diabetes: parseInt(formData.diabetes) || 0,
+        totChol: parseInt(formData.totChol) || 0,
+        sysBP: parseInt(formData.sysBP) || 0,
+        diaBP: parseInt(formData.diaBP) || 0,
+        BMI: parseFloat(formData.BMI) || 0,
+        heartRate: parseInt(formData.heartRate) || 0,
+        glucose: parseInt(formData.glucose) || 0,
+      };
+
+      console.log('Отправка данных:', payload);
+
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.PATHS.HEALTH.RISK}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (response.ok) {
-        const result = await response.json();
-        console.log('Данные успешно отправлены:', result);
-        return result;
+        const riskValue = await response.json(); // Получаем Double
+        
+        // Преобразуем в процент и округляем
+        const riskPercentage = Math.round(riskValue * 10000) / 100;
+        
+        console.log('Получен риск:', riskValue, 'Процент:', riskPercentage + '%');
+        
+        setResult({
+          raw: riskValue,
+          percentage: riskPercentage,
+          interpretation: interpretRisk(riskPercentage)
+        });
+        
+        return riskPercentage;
       } else {
-        throw new Error('Ошибка при отправке данных');
+        const errorText = await response.text();
+        throw new Error(errorText || 'Ошибка при отправке данных');
       }
     } catch (error) {
       console.error('Ошибка:', error);
+      setError(error.message);
       throw error;
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Функция для интерпретации риска
+  const interpretRisk = (percentage) => {
+    if (percentage < 5) {
+      return "Низкий риск";
+    } else if (percentage < 10) {
+      return "Умеренный риск";
+    } else if (percentage < 20) {
+      return "Повышенный риск";
+    } else {
+      return "Высокий риск - требуется консультация врача";
+    }
+  };
+
+  // Функция для форматирования процента
+  const formatPercentage = (value) => {
+    return value.toFixed(2);
   };
 
   function next(value) {
@@ -64,14 +121,7 @@ export default function HealthForm() {
       console.log("Результат:", finalAnswers);
       
       // Отправляем данные на сервер
-      submitFormData(finalAnswers)
-        .then(result => {
-          alert("Форма успешно отправлена!");
-          setSubmitted(true);
-        })
-        .catch(error => {
-          alert("Ошибка при отправке формы: " + error.message);
-        });
+      submitFormData(finalAnswers);
       return;
     }
     setInputValue("");
@@ -99,20 +149,75 @@ export default function HealthForm() {
     setStep(0);
     setInputValue("");
     setError("");
-    setSubmitted(false);
+    setResult(null);
+    setLoading(false);
   };
 
-  if (submitted) {
+  // Отображение результата
+  if (result) {
     return (
-      <div className="max-w-lg mx-auto p-6 mt-10 rounded-2xl shadow-lg bg-white text-black text-center">
-        <h2 className="text-2xl font-bold text-green-600 mb-4">Форма успешно отправлена!</h2>
-        <p className="mb-6">Спасибо за предоставленную информацию, {user?.username}!</p>
-        <button
-          onClick={resetForm}
-          className="bg-blue-600 text-white py-2 px-6 rounded-xl hover:bg-blue-700"
-        >
-          Заполнить снова
-        </button>
+      <div className="max-w-lg mx-auto p-6 mt-10 rounded-2xl shadow-lg bg-white text-black">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-center text-green-600 mb-4">
+            Анализ завершен!
+          </h2>
+          <p className="text-gray-600 text-center mb-2">
+            Пользователь: {user?.username}
+          </p>
+        </div>
+
+        <div className="bg-gray-50 p-6 rounded-xl mb-6">
+          <div className="text-center mb-6">
+            <div className="text-4xl font-bold text-blue-600 mb-2">
+              {formatPercentage(result.percentage)}%
+            </div>
+            <div className="text-lg font-semibold text-gray-800">
+              Риск сердечно-сосудистых заболеваний
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <div className={`p-4 rounded-lg text-center ${
+              result.percentage < 5 ? 'bg-green-100 text-green-800' :
+              result.percentage < 10 ? 'bg-yellow-100 text-yellow-800' :
+              result.percentage < 20 ? 'bg-orange-100 text-orange-800' :
+              'bg-red-100 text-red-800'
+            }`}>
+              <span className="font-bold">Интерпретация:</span> {result.interpretation}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="bg-white p-3 rounded-lg">
+              <div className="text-gray-500">Исходное значение</div>
+              <div className="font-bold">{result.raw}</div>
+            </div>
+            <div className="bg-white p-3 rounded-lg">
+              <div className="text-gray-500">Процент риска</div>
+              <div className="font-bold">{formatPercentage(result.percentage)}%</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-sm text-gray-600 mb-6">
+          <p className="mb-2">⚠️ <strong>Важно:</strong> Этот результат является прогнозом на основе математической модели.</p>
+          <p>Для точной диагностики обратитесь к врачу.</p>
+        </div>
+
+        <div className="flex gap-4">
+          <button
+            onClick={resetForm}
+            className="flex-1 bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 font-medium"
+          >
+            Заполнить снова
+          </button>
+          <button
+            onClick={() => window.print()}
+            className="flex-1 bg-gray-300 text-black py-3 rounded-xl hover:bg-gray-400 font-medium"
+          >
+            Распечатать результат
+          </button>
+        </div>
       </div>
     );
   }
@@ -120,7 +225,7 @@ export default function HealthForm() {
   return (
     <div className="max-w-lg mx-auto p-6 mt-10 rounded-2xl shadow-lg bg-white text-black">
       <div className="mb-4">
-        <h2 className="text-xl font-bold">Форма здоровья</h2>
+        <h2 className="text-xl font-bold">Анализ сердечно-сосудистых рисков</h2>
         <p className="text-gray-600">Пользователь: {user?.username}</p>
       </div>
 
@@ -151,7 +256,8 @@ export default function HealthForm() {
             <button
               key={idx}
               onClick={() => next(current.values[idx])}
-              className="flex-1 py-2 rounded-xl border bg-blue-100 hover:bg-blue-200 text-black font-medium"
+              className="flex-1 py-2 rounded-xl border bg-blue-100 hover:bg-blue-200 text-black font-medium disabled:bg-gray-100"
+              disabled={loading}
             >
               {opt}
             </button>
@@ -173,8 +279,10 @@ export default function HealthForm() {
             }}
             className={`w-full p-3 border rounded-xl bg-slate-50 text-black
               placeholder:text-slate-500 focus:outline-none focus:ring-2 
-              ${error ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"}`}
+              ${error ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"}
+              disabled:bg-gray-100`}
             placeholder="Введите значение"
+            disabled={loading}
           />
 
           {error && (
@@ -183,9 +291,10 @@ export default function HealthForm() {
 
           <button
             onClick={handleNext}
-            className="mt-4 w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 font-medium"
+            disabled={loading}
+            className="mt-4 w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 font-medium disabled:bg-blue-400 disabled:cursor-not-allowed"
           >
-            {step === questions.length - 1 ? 'Отправить форму' : 'Далее'}
+            {loading ? 'Обработка...' : (step === questions.length - 1 ? 'Отправить на анализ' : 'Далее')}
           </button>
         </>
       )}
@@ -197,7 +306,8 @@ export default function HealthForm() {
             setInputValue("");
             setError("");
           }}
-          className="mt-4 w-full bg-gray-300 text-black py-2 rounded-xl hover:bg-gray-400"
+          className="mt-4 w-full bg-gray-300 text-black py-2 rounded-xl hover:bg-gray-400 disabled:bg-gray-200"
+          disabled={loading}
         >
           Назад
         </button>

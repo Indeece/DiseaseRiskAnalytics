@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+// import API_CONFIG from './config';
+import API_CONFIG from '../config';
 const AuthContext = createContext(null);
 
 export const useAuth = () => {
@@ -13,14 +14,14 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [accessToken, setAccessToken] = useState(localStorage.getItem('token') || null); // Изменяем на 'token'
+  const [accessToken, setAccessToken] = useState(localStorage.getItem('token') || null);
   const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refreshToken') || null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const checkAuth = () => {
-      const storedToken = localStorage.getItem('token'); // Изменяем на 'token'
+      const storedToken = localStorage.getItem('token');
       const storedRefreshToken = localStorage.getItem('refreshToken');
       const storedUser = localStorage.getItem('user');
       
@@ -35,8 +36,8 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const setTokens = (token, refreshToken) => { // Первый параметр теперь token, а не accessToken
-    localStorage.setItem('token', token); // Сохраняем как 'token'
+  const setTokens = (token, refreshToken) => {
+    localStorage.setItem('token', token);
     localStorage.setItem('refreshToken', refreshToken);
     setAccessToken(token);
     setRefreshToken(refreshToken);
@@ -44,7 +45,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-      const response = await fetch('http://localhost:8090/auth/signIn', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.PATHS.AUTH.LOGIN}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,9 +58,8 @@ export const AuthProvider = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log('Ответ от сервера:', data); // Для отладки
+        console.log('Ответ от сервера:', data);
         
-        // Используем data.token и data.refreshToken
         setTokens(data.token, data.refreshToken);
         
         const userData = {
@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('token'); // Удаляем 'token'
+    localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     setAccessToken(null);
@@ -96,16 +96,19 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await fetch('http://localhost:8090/auth/register', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.PATHS.AUTH.REGISTER}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify({
+          username: userData.username,
+          email: userData.email,
+          password: userData.password
+        }),
       });
 
       if (response.ok) {
-        // После успешной регистрации автоматически входим по username
         const loginResult = await login(userData.username, userData.password);
         return loginResult;
       } else {
@@ -124,55 +127,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const refreshAccessToken = async (currentRefreshToken) => {
-    if (!currentRefreshToken) return null;
-    
-    try {
-      const response = await fetch('http://localhost:8090/auth/refresh', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ refreshToken: currentRefreshToken }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        return {
-          token: data.token, // Используем data.token
-          refreshToken: data.refreshToken
-        };
-      }
-      return null;
-    } catch (error) {
-      console.error('Ошибка при обновлении токена:', error);
-      return null;
-    }
-  };
-
-  const refreshTokens = async () => {
-    const currentRefreshToken = localStorage.getItem('refreshToken');
-    const newTokens = await refreshAccessToken(currentRefreshToken);
-    
-    if (newTokens) {
-      setTokens(newTokens.token, newTokens.refreshToken); // Используем newTokens.token
-      return newTokens.token;
-    } else {
-      logout();
-      return null;
-    }
-  };
-
   const value = {
     user,
-    token: accessToken, // Экспортируем как token для удобства
-    accessToken, // Оставляем для обратной совместимости
+    token: accessToken,
+    accessToken,
     refreshToken,
     loading,
     login,
     logout,
     register,
-    refreshTokens,
     isAuthenticated: !!accessToken
   };
 
