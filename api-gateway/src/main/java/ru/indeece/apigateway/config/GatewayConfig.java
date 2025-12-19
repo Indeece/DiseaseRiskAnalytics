@@ -33,18 +33,18 @@ public class GatewayConfig {
                         .uri("lb://auth-service")
                 )
 
-                .route("heart-disease-api", r -> r.path("/api/**")
+                .route("heart-disease-api", r -> r.path("/api/heart/**")
                         .filters(f -> f.filter(jwtAuthFilter.apply(
                                 new JwtAuthenticationFilter.Config().setPublicEndpoints(PUBLIC_ENDPOINTS)
                         )))
                         .uri("lb://heart-disease-api")
                 )
 
-                .route("diabetes-api", r -> r.path("/api/**")
+                .route("diabetes-api", r -> r.path("/api/diabetes/**")
                         .filters(f -> f.filter(jwtAuthFilter.apply(
                                 new JwtAuthenticationFilter.Config().setPublicEndpoints(PUBLIC_ENDPOINTS)
                         )))
-                        .uri("lb://heart-disease-api")
+                        .uri("lb://diabetes-api")
                 )
 
                 .build();

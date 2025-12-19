@@ -9,10 +9,10 @@ import ru.indeece.heartdiseaseapi.dto.RiskResponse;
 
 @FeignClient(
         name = "heart-disease-api",
-        url = "http://localhost:80",
+        url = "http://chd_server:80",
         configuration = FeignConfig.class
 )
 public interface HeartDiseaseApiClient {
-    @PostMapping(value = "/predict", consumes = "application/json")
+    @PostMapping(value = "/predictCHD", consumes = "application/json")
     RiskResponse getAnalyzedRisk(@RequestBody RiskRequest request);
 }

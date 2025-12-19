@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(
         name = "diabets-api",
-        url = "http://localhost:70",
+        url = "http://diabetes_server:80",
         configuration = FeignConfig.class
 )
 public interface DiabetesApiClient {
-    @PostMapping(value = "predict", consumes = "application/json")
+    @PostMapping(value = "/predictDIAB", consumes = "application/json")
     DiabetesRiskResponse getAnalyzedRisk(@RequestBody DiabetesRiskRequest request);
 }
