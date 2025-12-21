@@ -1,7 +1,5 @@
 const API_CONFIG = {
-  // Для разработки - локальный gateway
-  // Для продакшена в Docker - будет заменено через переменные окружения
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000',
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api',
   
   
   PATHS: {
@@ -11,10 +9,10 @@ const API_CONFIG = {
       REFRESH: '/auth/refresh'
     },
     HEALTH: {
-      RISK: '/api/risk'  // Для сердечно-сосудистой системы
+      RISK: '/heart/risk'  // Для сердечно-сосудистой системы
     },
     DIABETES: {
-      PREDICT: '/api/diabetes/risk'  // Для диабета
+      PREDICT: '/diabetes/risk'  // Для диабета
     }
   }
 };
