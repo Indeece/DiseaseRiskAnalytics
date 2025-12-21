@@ -1,5 +1,5 @@
 const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api',
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5173/api',
   
   
   PATHS: {
@@ -15,7 +15,7 @@ const API_CONFIG = {
       PREDICT: '/diabetes/risk'  // Для диабета
     },
     OSTEOPOROSIS: {
-      PREDICT: '/osteoporosis/risk'
+      PREDICT: '/osteoporosis/risk' // Для остеопороза
     }
   }
 };
