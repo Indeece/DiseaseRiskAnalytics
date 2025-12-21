@@ -41,7 +41,7 @@ public class SecurityConfig {
                 .csrf((csrf) -> csrf.disable())
 //                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Включаем CORS с конфигурацией
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/register", "/auth/signIn", "/auth/refresh").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/signIn", "/api/auth/refresh").permitAll()
                         .requestMatchers("/auth/user/**").hasAuthority("ROLE_USER")
                         .anyRequest().authenticated()
                 )

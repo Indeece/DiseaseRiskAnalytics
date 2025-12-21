@@ -14,9 +14,9 @@ public class GatewayConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
 
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
-            "/auth/register",
-            "/auth/signIn",
-            "/auth/refresh"
+            "/api/auth/register",
+            "/api/auth/signIn",
+            "/api/auth/refresh"
     );
 
     public GatewayConfig(JwtAuthenticationFilter jwtAuthFilter) {
@@ -26,12 +26,14 @@ public class GatewayConfig {
     @Bean
     public RouteLocator routes(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route("auth-service", r -> r.path("/auth/**")
-                        .filters(f -> f.filter(jwtAuthFilter.apply(
-                                new JwtAuthenticationFilter.Config().setPublicEndpoints(PUBLIC_ENDPOINTS)
-                        )))
+                .route("auth-service", r -> r.path("/api/auth/**")
                         .uri("lb://auth-service")
                 )
+
+
+//                .filters(f -> f.filter(jwtAuthFilter.apply(
+//                        new JwtAuthenticationFilter.Config().setPublicEndpoints(PUBLIC_ENDPOINTS)
+//                )))
 
                 .route("heart-disease-api", r -> r.path("/api/heart/**")
                         .filters(f -> f.filter(jwtAuthFilter.apply(
