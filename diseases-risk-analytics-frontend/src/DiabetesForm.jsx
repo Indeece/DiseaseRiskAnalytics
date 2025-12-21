@@ -111,7 +111,7 @@ export default function DiabetesForm() {
       if (response.ok) {
         const riskValue = await response.json(); // Получаем Double
         
-        const riskPercentage = Math.round(riskValue * 10000) / 100;
+        const riskPercentage = Math.round(riskValue * 100) / 100;
         const interpretation = interpretDiabetesRisk(riskValue);
         
         console.log('Получен риск диабета:', riskValue, 'Процент:', riskPercentage + '%');
