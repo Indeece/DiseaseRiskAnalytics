@@ -39,7 +39,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf((csrf) -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Включаем CORS с конфигурацией
+//                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Включаем CORS с конфигурацией
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/auth/register", "/auth/signIn", "/auth/refresh").permitAll()
                         .requestMatchers("/auth/user/**").hasAuthority("ROLE_USER")
@@ -51,18 +51,18 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Разрешаем фронтенд
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Разрешаем методы
-        configuration.setAllowedHeaders(Arrays.asList("*")); // Разрешаем все заголовки
-        configuration.setAllowCredentials(true); // Разрешаем отправку куки/авторизации
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Применяем ко всем путям
-        return source;
-    }
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); // Разрешаем фронтенд
+//        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Разрешаем методы
+//        configuration.setAllowedHeaders(Arrays.asList("*")); // Разрешаем все заголовки
+//        configuration.setAllowCredentials(true); // Разрешаем отправку куки/авторизации
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration); // Применяем ко всем путям
+//        return source;
+//    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
