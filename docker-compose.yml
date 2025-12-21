@@ -89,3 +89,17 @@ services:
       - "8084:8084"
     networks:
       - risk-diseases
+
+  osteoporosis-api:
+    build:
+      context: ./osteoporosis-api
+      dockerfile: Dockerfile
+    depends_on:
+      - auth-service
+      - eureka-server
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    ports:
+      - "8086:8086"
+    networks:
+      - risk-diseases
