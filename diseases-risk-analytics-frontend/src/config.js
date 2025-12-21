@@ -1,9 +1,9 @@
-// Конфигурация API
 const API_CONFIG = {
-  // Базовый URL через Eureka Gateway
-  BASE_URL: 'http://localhost:8090',
+  // Для разработки - локальный gateway
+  // Для продакшена в Docker - будет заменено через переменные окружения
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8090',
   
-  // Пути к API
+  
   PATHS: {
     AUTH: {
       LOGIN: '/auth/signIn',
@@ -14,7 +14,7 @@ const API_CONFIG = {
       RISK: '/api/risk'  // Для сердечно-сосудистой системы
     },
     DIABETES: {
-      PREDICT: '/api/diabetes/predict'  // Для диабета
+      PREDICT: '/api/diabetes/risk'  // Для диабета
     }
   }
 };

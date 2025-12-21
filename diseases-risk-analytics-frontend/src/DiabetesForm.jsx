@@ -4,94 +4,101 @@ import API_CONFIG from './config';
 
 export default function DiabetesForm() {
   const { user, token } = useAuth();
-  
-  const [formData, setFormData] = useState({
-    Pregnancies: '',
-    Glucose: '',
-    BloodPressure: '',
-    Insulin: '',
-    BMI: '',
-    Age: ''
-  });
-  
-  const [error, setError] = useState('');
+
+  // Конфигурация вопросов для пошаговой формы
+  const questions = [
+    { 
+      key: "Pregnancies", 
+      label: "Количество беременностей", 
+      type: "number", 
+      placeholder: "Например: 1",
+      step: "1",
+      parser: (val) => parseInt(val, 10)
+    },
+    { 
+      key: "Glucose", 
+      label: "Уровень глюкозы", 
+      type: "number", 
+      placeholder: "Например: 120.5",
+      step: "0.1",
+      parser: (val) => parseFloat(val)
+    },
+    { 
+      key: "BloodPressure", 
+      label: "Артериальное давление", 
+      type: "number", 
+      placeholder: "Например: 80",
+      step: "1",
+      parser: (val) => parseInt(val, 10)
+    },
+    { 
+      key: "Insulin", 
+      label: "Инсулин", 
+      type: "number", 
+      placeholder: "Например: 85.2",
+      step: "0.1",
+      parser: (val) => parseFloat(val)
+    },
+    { 
+      key: "BMI", 
+      label: "Индекс массы тела (BMI)", 
+      type: "number", 
+      placeholder: "Например: 24.5",
+      step: "0.1",
+      parser: (val) => parseFloat(val)
+    },
+    { 
+      key: "Age", 
+      label: "Возраст", 
+      type: "number", 
+      placeholder: "Например: 35",
+      step: "1",
+      parser: (val) => parseInt(val, 10)
+    }
+  ];
+
+  const [answers, setAnswers] = useState({});
+  const [step, setStep] = useState(0);
+  const [inputValue, setInputValue] = useState("");
+  const [error, setError] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    setError('');
-  };
+  const current = questions[step];
 
-  // Функция валидации данных
-  const validateForm = () => {
-    const requiredFields = ['Pregnancies', 'Glucose', 'BloodPressure', 'Insulin', 'BMI', 'Age'];
-    
-    for (const field of requiredFields) {
-      if (!formData[field].trim()) {
-        setError(`Поле "${field}" обязательно для заполнения`);
-        return false;
-      }
-      
-      const numValue = parseFloat(formData[field]);
-      if (isNaN(numValue)) {
-        setError(`Поле "${field}" должно быть числом`);
-        return false;
-      }
-      
-      if (numValue < 0) {
-        setError(`Поле "${field}" не может быть отрицательным`);
-        return false;
-      }
-    }
-    
-    return true;
-  };
-
-  // Функция интерпретации результата диабета
+  // Функция интерпретации результата (из старого DiabetesForm)
   const interpretDiabetesRisk = (riskValue) => {
-    // Предполагаем, что riskValue от 0 до 1
     const percentage = riskValue * 100;
     
     if (percentage < 30) {
-      return { level: "Низкий", color: "bg-green-100 text-green-800" };
+      return { text: "Низкий риск", color: "bg-green-100 text-green-800", description: "Вероятность диабета минимальна" };
     } else if (percentage < 60) {
-      return { level: "Умеренный", color: "bg-yellow-100 text-yellow-800" };
+      return { text: "Умеренный риск", color: "bg-yellow-100 text-yellow-800", description: "Рекомендуется наблюдение" };
     } else if (percentage < 80) {
-      return { level: "Высокий", color: "bg-orange-100 text-orange-800" };
+      return { text: "Высокий риск", color: "bg-orange-100 text-orange-800", description: "Необходима консультация врача" };
     } else {
-      return { level: "Очень высокий", color: "bg-red-100 text-red-800" };
+      return { text: "Очень высокий риск", color: "bg-red-100 text-red-800", description: "Срочно обратитесь к эндокринологу" };
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-    
+  // Функция отправки данных
+  const submitFormData = async (finalAnswers) => {
     setLoading(true);
     setError('');
-    setResult(null);
     
     try {
+      // Формируем payload, используя парсеры из конфига вопросов или дефолтные значения
       const payload = {
-        Pregnancies: parseInt(formData.Pregnancies, 10),
-        Glucose: parseFloat(formData.Glucose),
-        BloodPressure: parseInt(formData.BloodPressure, 10),
-        Insulin: parseFloat(formData.Insulin),
-        BMI: parseFloat(formData.BMI),
-        Age: parseInt(formData.Age, 10),
+        Pregnancies: parseInt(finalAnswers.Pregnancies) || 0,
+        Glucose: parseFloat(finalAnswers.Glucose) || 0,
+        BloodPressure: parseInt(finalAnswers.BloodPressure) || 0,
+        Insulin: parseFloat(finalAnswers.Insulin) || 0,
+        BMI: parseFloat(finalAnswers.BMI) || 0,
+        Age: parseInt(finalAnswers.Age) || 0,
       };
 
       console.log('Отправка данных для диабета:', payload);
       
-      // Отправка данных через Eureka Gateway
       const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.PATHS.DIABETES.PREDICT}`, {
         method: 'POST',
         headers: {
@@ -104,7 +111,6 @@ export default function DiabetesForm() {
       if (response.ok) {
         const riskValue = await response.json(); // Получаем Double
         
-        // Преобразуем в проценты
         const riskPercentage = Math.round(riskValue * 10000) / 100;
         const interpretation = interpretDiabetesRisk(riskValue);
         
@@ -117,45 +123,80 @@ export default function DiabetesForm() {
         });
       } else {
         const errorText = await response.text();
-        setError(`Ошибка отправки: ${errorText}`);
+        throw new Error(errorText || 'Ошибка отправки данных');
       }
     } catch (err) {
       console.error('Ошибка при отправке данных:', err);
-      setError('Не удалось подключиться к серверу');
+      setError(err.message || 'Не удалось подключиться к серверу');
     } finally {
       setLoading(false);
     }
   };
 
+  // Переход к следующему шагу
+  function next(value) {
+    // Сохраняем значение в общем стейте
+    const updatedAnswers = { ...answers, [current.key]: value };
+    setAnswers(updatedAnswers);
+    setError("");
+
+    if (step === questions.length - 1) {
+      // Последний вопрос - отправляем данные
+      submitFormData(updatedAnswers);
+      return;
+    }
+
+    setInputValue("");
+    setStep(step + 1);
+  }
+
+  // Обработчик кнопки "Далее" для инпутов
+  function handleNext() {
+    if (inputValue === "") {
+      setError("Поле не может быть пустым");
+      return;
+    }
+
+    const numValue = parseFloat(inputValue);
+
+    if (isNaN(numValue)) {
+      setError("Значение должно быть числом");
+      return;
+    }
+
+    if (numValue < 0) {
+      setError("Значение не может быть отрицательным");
+      return;
+    }
+
+    setError("");
+    // Используем парсер вопроса если он есть (для int/float), иначе просто число
+    const parsedValue = current.parser ? current.parser(inputValue) : numValue;
+    next(parsedValue);
+  }
+
   // Сброс формы
   const resetForm = () => {
-    setFormData({
-      Pregnancies: '',
-      Glucose: '',
-      BloodPressure: '',
-      Insulin: '',
-      BMI: '',
-      Age: ''
-    });
-    setError('');
+    setAnswers({});
+    setStep(0);
+    setInputValue("");
+    setError("");
     setResult(null);
     setLoading(false);
   };
 
-  // Общий класс для инпутов
-  const inputClassName = "w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow text-black disabled:bg-gray-100";
-
-  // Отображение результата
+  // --- Рендер результата (стиль как в HealthForm) ---
   if (result) {
     return (
-      <div className="bg-white p-8 rounded-2xl shadow-lg border border-slate-100 w-full max-w-md mx-auto">
-        <h2 className="text-2xl font-bold text-slate-800 mb-2 text-center">
-          Результат анализа
-        </h2>
-        
-        <p className="text-gray-600 text-sm mb-6 text-center">
-          Пользователь: {user?.username}
-        </p>
+      <div className="max-w-lg mx-auto p-6 mt-10 rounded-2xl shadow-lg bg-white text-black">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-center text-blue-600 mb-4">
+            Анализ завершен!
+          </h2>
+          <p className="text-gray-600 text-center mb-2">
+            Пользователь: {user?.username}
+          </p>
+        </div>
 
         <div className="bg-gray-50 p-6 rounded-xl mb-6">
           <div className="text-center mb-6">
@@ -167,13 +208,12 @@ export default function DiabetesForm() {
             </div>
           </div>
 
-          <div className={`p-4 rounded-lg text-center mb-6 ${result.interpretation.color}`}>
-            <div className="font-bold text-lg mb-1">{result.interpretation.level} риск</div>
-            <div className="text-sm">
-              {result.interpretation.level === "Низкий" ? "Вероятность диабета минимальна" :
-               result.interpretation.level === "Умеренный" ? "Рекомендуется наблюдение" :
-               result.interpretation.level === "Высокий" ? "Необходима консультация врача" :
-               "Срочно обратитесь к эндокринологу"}
+          <div className="mb-6">
+            <div className={`p-4 rounded-lg text-center ${result.interpretation.color}`}>
+              <div className="font-bold text-lg mb-1">{result.interpretation.text}</div>
+              <div className="text-sm">
+                {result.interpretation.description}
+              </div>
             </div>
           </div>
 
@@ -197,13 +237,13 @@ export default function DiabetesForm() {
         <div className="flex gap-4">
           <button
             onClick={resetForm}
-            className="flex-1 bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 font-semibold"
+            className="flex-1 bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 font-medium"
           >
             Новый анализ
           </button>
           <button
             onClick={() => window.print()}
-            className="flex-1 bg-gray-300 text-black py-3 rounded-md hover:bg-gray-400 font-semibold"
+            className="flex-1 bg-gray-300 text-black py-3 rounded-xl hover:bg-gray-400 font-medium"
           >
             Распечатать
           </button>
@@ -212,156 +252,94 @@ export default function DiabetesForm() {
     );
   }
 
+  // --- Основной рендер формы ---
   return (
-    <form 
-      onSubmit={handleSubmit} 
-      className="bg-white p-8 rounded-2xl shadow-lg border border-slate-100 w-full max-w-md mx-auto"
-    >
-      <h2 className="text-2xl font-bold text-slate-800 mb-2 text-center">
-        Проверка на диабет
-      </h2>
-      
-      <p className="text-gray-600 text-sm mb-6 text-center">
-        Пользователь: {user?.username}
-      </p>
+    <div className="max-w-lg mx-auto p-6 mt-10 rounded-2xl shadow-lg bg-white text-black">
+      <div className="mb-4">
+        <h2 className="text-xl font-bold">Проверка на диабет</h2>
+        <p className="text-gray-600">Пользователь: {user?.username}</p>
+      </div>
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-          {error}
+      {/* Прогресс бар */}
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-sm font-medium">Прогресс</span>
+          <span className="text-sm font-medium">{step + 1} из {questions.length}</span>
         </div>
+        <div className="w-full bg-gray-200 rounded-full h-2.5">
+          <div 
+            className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+            style={{ width: `${((step + 1) / questions.length) * 100}%` }}
+          ></div>
+        </div>
+      </div>
+
+      <h2 className="text-xl font-semibold mb-4">
+        Вопрос {step + 1} из {questions.length}
+      </h2>
+
+      <label className="block mb-3 text-lg font-medium">
+        {current.label}
+      </label>
+
+      {/* Для диабета все поля числовые, но структуру оставляем гибкой */}
+      {current.type === "choice" ? (
+         <div className="flex gap-4 mt-4">
+           {/* Логика для choice если понадобится в будущем */}
+         </div>
+      ) : (
+        <>
+          <input
+            type="number"
+            min="0"
+            step={current.step || "1"}
+            value={inputValue}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+              if (Number(e.target.value) < 0) {
+                setError("Значение не может быть меньше 0");
+              } else {
+                setError("");
+              }
+            }}
+            className={`w-full p-3 border rounded-xl bg-slate-50 text-black
+              placeholder:text-slate-500 focus:outline-none focus:ring-2 
+              ${error ? "border-red-500 focus:ring-red-400" : "focus:ring-blue-400"}
+              disabled:bg-gray-100`}
+            placeholder={current.placeholder || "Введите значение"}
+            disabled={loading}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleNext();
+            }}
+          />
+
+          {error && (
+            <p className="text-red-500 text-sm mt-2">{error}</p>
+          )}
+
+          <button
+            onClick={handleNext}
+            disabled={loading}
+            className="mt-4 w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 font-medium disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? 'Анализ...' : (step === questions.length - 1 ? 'Отправить на анализ' : 'Далее')}
+          </button>
+        </>
       )}
 
-      <div className="space-y-4">
-        
-        {/* Pregnancies: int */}
-        <div>
-          <label className="block mb-1 font-semibold text-gray-700 text-sm">
-            Количество беременностей
-          </label>
-          <input
-            type="number"
-            name="Pregnancies"
-            value={formData.Pregnancies}
-            onChange={handleChange}
-            required
-            min="0"
-            step="1"
-            placeholder="Например: 1"
-            className={inputClassName}
-            disabled={loading}
-          />
-        </div>
-
-        {/* Glucose: float */}
-        <div>
-          <label className="block mb-1 font-semibold text-gray-700 text-sm">
-            Уровень глюкозы (Glucose)
-          </label>
-          <input
-            type="number"
-            name="Glucose"
-            value={formData.Glucose}
-            onChange={handleChange}
-            required
-            min="0"
-            step="0.1" 
-            placeholder="Например: 120.5"
-            className={inputClassName}
-            disabled={loading}
-          />
-        </div>
-
-        {/* BloodPressure: int */}
-        <div>
-          <label className="block mb-1 font-semibold text-gray-700 text-sm">
-            Артериальное давление (BloodPressure)
-          </label>
-          <input
-            type="number"
-            name="BloodPressure"
-            value={formData.BloodPressure}
-            onChange={handleChange}
-            required
-            min="0"
-            step="1"
-            placeholder="Например: 80"
-            className={inputClassName}
-            disabled={loading}
-          />
-        </div>
-
-        {/* Insulin: float */}
-        <div>
-          <label className="block mb-1 font-semibold text-gray-700 text-sm">
-            Инсулин (Insulin)
-          </label>
-          <input
-            type="number"
-            name="Insulin"
-            value={formData.Insulin}
-            onChange={handleChange}
-            required
-            min="0"
-            step="0.1"
-            placeholder="Например: 85.2"
-            className={inputClassName}
-            disabled={loading}
-          />
-        </div>
-
-        {/* BMI: float */}
-        <div>
-          <label className="block mb-1 font-semibold text-gray-700 text-sm">
-            Индекс массы тела (BMI)
-          </label>
-          <input
-            type="number"
-            name="BMI"
-            value={formData.BMI}
-            onChange={handleChange}
-            required
-            min="0"
-            step="0.1"
-            placeholder="Например: 24.5"
-            className={inputClassName}
-            disabled={loading}
-          />
-        </div>
-
-        {/* Age: int */}
-        <div>
-          <label className="block mb-1 font-semibold text-gray-700 text-sm">
-            Возраст (Age)
-          </label>
-          <input
-            type="number"
-            name="Age"
-            value={formData.Age}
-            onChange={handleChange}
-            required
-            min="0"
-            step="1"
-            placeholder="Например: 35"
-            className={inputClassName}
-            disabled={loading}
-          />
-        </div>
-
-      </div>
-
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full mt-8 py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors shadow-md disabled:bg-blue-400 disabled:cursor-not-allowed"
-      >
-        {loading ? 'Анализ...' : 'Проверить'}
-      </button>
-      
-      {/* Информация о формате данных */}
-      <div className="mt-4 text-xs text-gray-500">
-        <p>Все поля обязательны для заполнения.</p>
-        <p>Данные отправляются через Eureka Gateway на сервис анализа диабета.</p>
-      </div>
-    </form>
+      {step > 0 && (
+        <button
+          onClick={() => {
+            setStep(step - 1);
+            setInputValue("");
+            setError("");
+          }}
+          className="mt-4 w-full bg-gray-300 text-black py-2 rounded-xl hover:bg-gray-400 disabled:bg-gray-200 transition-colors"
+          disabled={loading}
+        >
+          Назад
+        </button>
+      )}
+    </div>
   );
 }
