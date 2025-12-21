@@ -69,7 +69,7 @@ export default function HealthForm() {
         const riskValue = await response.json(); // Получаем Double
         
         // Преобразуем в процент и округляем
-        const riskPercentage = Math.round(riskValue * 10000) / 100;
+        const riskPercentage = Math.round(riskValue * 100) / 100;
         
         console.log('Получен риск:', riskValue, 'Процент:', riskPercentage + '%');
         

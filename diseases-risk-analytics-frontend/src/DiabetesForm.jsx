@@ -68,7 +68,7 @@ export default function DiabetesForm() {
 
   // Функция интерпретации результата (из старого DiabetesForm)
   const interpretDiabetesRisk = (riskValue) => {
-    const percentage = riskValue * 100;
+    const percentage = riskValue;
     
     if (percentage < 30) {
       return { text: "Низкий риск", color: "bg-green-100 text-green-800", description: "Вероятность диабета минимальна" };
