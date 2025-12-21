@@ -78,7 +78,7 @@ export default function HealthForm() {
           percentage: riskPercentage,
           interpretation: interpretRisk(riskPercentage)
         });
-        
+          
         return riskPercentage;
       } else {
         const errorText = await response.text();
