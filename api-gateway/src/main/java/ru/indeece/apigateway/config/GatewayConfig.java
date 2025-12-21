@@ -27,13 +27,18 @@ public class GatewayConfig {
     public RouteLocator routes(RouteLocatorBuilder builder) {
         return builder.routes()
                 .route("auth-service", r -> r.path("/api/auth/**")
+                        .filters(f -> f.filter(jwtAuthFilter.apply(
+                                new JwtAuthenticationFilter.Config().setPublicEndpoints(PUBLIC_ENDPOINTS)
+                        )))
                         .uri("lb://auth-service")
                 )
 
-
-//                .filters(f -> f.filter(jwtAuthFilter.apply(
-//                        new JwtAuthenticationFilter.Config().setPublicEndpoints(PUBLIC_ENDPOINTS)
-//                )))
+                .route("osteoporosis-api", r -> r.path("/api/osteoporosis/**")
+                        .filters(f -> f.filter(jwtAuthFilter.apply(
+                                new JwtAuthenticationFilter.Config().setPublicEndpoints(PUBLIC_ENDPOINTS)
+                        )))
+                        .uri("lb://osteoporosis-api")
+                )
 
                 .route("heart-disease-api", r -> r.path("/api/heart/**")
                         .filters(f -> f.filter(jwtAuthFilter.apply(
