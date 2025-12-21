@@ -13,6 +13,9 @@ const API_CONFIG = {
     },
     DIABETES: {
       PREDICT: '/diabetes/risk'  // Для диабета
+    },
+    OSTEOPOROSIS: {
+      PREDICT: '/osteoporosis/risk'
     }
   }
 };

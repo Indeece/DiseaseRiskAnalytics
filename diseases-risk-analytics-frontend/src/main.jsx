@@ -9,6 +9,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './ProtectedRoute';
+import OsteoporosisForm from './OsteoporosisForm.jsx';
 
 // Компонент приложения, который использует аутентификацию
 function AppContent() {
@@ -69,6 +70,15 @@ function AppContent() {
             >
               Диабет
             </NavLink>
+
+            <NavLink 
+              to="/osteoporosis" 
+              className={({ isActive }) => 
+                isActive ? "text-blue-600 transition-colors" : "text-slate-600 hover:text-blue-600 transition-colors"
+              }
+            >
+              Остеопороз
+            </NavLink>
             
             <button 
               onClick={logout}
@@ -96,6 +106,11 @@ function AppContent() {
           <Route path="/diabetes" element={
             <ProtectedRoute>
               <DiabetesForm />
+            </ProtectedRoute>
+          } />
+          <Route path="/osteoporosis" element={
+            <ProtectedRoute>
+              <OsteoporosisForm />
             </ProtectedRoute>
           } />
         </Routes>
