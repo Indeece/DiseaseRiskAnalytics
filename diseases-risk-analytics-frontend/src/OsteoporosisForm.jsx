@@ -140,11 +140,11 @@ export default function OsteoporosisForm() {
   const interpretOsteoporosisRisk = (riskValue) => {
     const percentage = riskValue;
     
-    if (percentage < 30) {
+    if (percentage < 20) {
       return { text: "Низкий риск", color: "bg-green-100 text-green-800", description: "Вероятность остеопороза минимальна" };
-    } else if (percentage < 60) {
+    } else if (percentage < 50) {
       return { text: "Умеренный риск", color: "bg-yellow-100 text-yellow-800", description: "Рекомендуется профилактика" };
-    } else if (percentage < 80) {
+    } else if (percentage < 70) {
       return { text: "Высокий риск", color: "bg-orange-100 text-orange-800", description: "Необходима консультация ортопеда" };
     } else {
       return { text: "Очень высокий риск", color: "bg-red-100 text-red-800", description: "Срочно обратитесь к врачу" };
