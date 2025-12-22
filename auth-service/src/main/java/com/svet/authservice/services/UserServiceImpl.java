@@ -36,6 +36,7 @@ public class UserServiceImpl implements UserService {
         User user = findByCredentials(userCredentials);
         Map<String, Object> claims = setUserClaims(user);
         return jwtService.generateTokens(claims, user.getUsername());
+
     }
 
     @Override
@@ -97,9 +98,13 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-    private User findByCredentials(UserCredentials userCredentials) {
-        Optional<User> user = userRepo.findByUsername(userCredentials.getUsername());
-        return user.orElse(null);
+    private User findByCredentials(UserCredentials userCredentials) throws AuthenticationException {
+        Optional<User> userOpt = userRepo.findByUsername(userCredentials.getUsername());
+        User user = userOpt.orElseThrow(() -> new AuthenticationException("Данные введены неверно"));
+        if (!encoder.matches(userCredentials.getPassword(), user.getPassword())) {
+            throw new AuthenticationException("Пароль введён неверно");
+        }
+        return user;
     }
 
     private Map<String, Object> setUserClaims(User user) {
