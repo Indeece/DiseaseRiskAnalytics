@@ -36,7 +36,6 @@ public class UserServiceImpl implements UserService {
         User user = findByCredentials(userCredentials);
         Map<String, Object> claims = setUserClaims(user);
         return jwtService.generateTokens(claims, user.getUsername());
-
     }
 
     @Override

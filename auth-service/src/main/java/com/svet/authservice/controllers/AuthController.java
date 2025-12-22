@@ -58,9 +58,4 @@ public class AuthController {
         JwtDto jwt =  userService.refreshToken(refreshTokenDto);
         return ResponseEntity.ok(jwt);
     }
-
-    @PostMapping("/protected")
-    public String protectedRoute() {
-        return "protected";
-    }
 }
