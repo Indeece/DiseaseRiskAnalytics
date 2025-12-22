@@ -69,7 +69,7 @@ export default function HealthForm() {
         const riskValue = await response.json(); // Получаем Double
         
         // Преобразуем в процент и округляем
-        const riskPercentage = Math.round(riskValue * 100) / 100;
+        const riskPercentage = riskValue;
         
         console.log('Получен риск:', riskValue, 'Процент:', riskPercentage + '%');
         
@@ -178,9 +178,9 @@ export default function HealthForm() {
 
           <div className="mb-6">
             <div className={`p-4 rounded-lg text-center ${
-              result.percentage < 5 ? 'bg-green-100 text-green-800' :
-              result.percentage < 10 ? 'bg-yellow-100 text-yellow-800' :
-              result.percentage < 20 ? 'bg-orange-100 text-orange-800' :
+              result.percentage < 35 ? 'bg-green-100 text-green-800' :
+              result.percentage < 50 ? 'bg-yellow-100 text-yellow-800' :
+              result.percentage < 75 ? 'bg-orange-100 text-orange-800' :
               'bg-red-100 text-red-800'
             }`}>
               <span className="font-bold">Интерпретация:</span> {result.interpretation}
