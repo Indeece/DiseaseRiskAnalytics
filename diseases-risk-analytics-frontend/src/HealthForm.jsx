@@ -95,11 +95,11 @@ export default function HealthForm() {
 
   // Функция для интерпретации риска
   const interpretRisk = (percentage) => {
-    if (percentage < 5) {
+    if (percentage < 35) {
       return "Низкий риск";
-    } else if (percentage < 10) {
+    } else if (percentage < 50) {
       return "Умеренный риск";
-    } else if (percentage < 20) {
+    } else if (percentage < 75) {
       return "Повышенный риск";
     } else {
       return "Высокий риск - требуется консультация врача";
